@@ -3,7 +3,7 @@ import json
 import sys
 import math
 import time
-from aima.search import Problem, Node, breadth_first_graph_search
+import game
 
 def usage():
     print("Usage: client server_host <white | black>")
@@ -44,22 +44,16 @@ try:
     # present name
     send_utf(sock, "Ragnarok")
 
-    ####################################### game loop
     # wait init state
-    print(recv_json(sock))
+    state = recv_json(sock)    
 
-    if color=="white":
-        message = {"from": "d5", "to": "d6"}
-    if color=="black":
-        data = sock.recv(2)
-        print(data)
-        message = {"from": "a4", "to": "b4"}
-
-    send_utf(sock, json.dumps(message))
-
+    # game loop:
     while True:
-        print(recv_json(sock))
-        time.sleep(0.2)
+        print(state)
+        if color.upper() == state["turn"]:
+            move = game.next_move(state)
+            send_utf(sock, json.dumps(move))
+        state = recv_json(sock)
 
 finally:
     print('closing socket')
