@@ -2,9 +2,7 @@ from collections import namedtuple
 import random
 import itertools
 import copy
-from utils import argmax, vector_add, MCT_Node, ucb
-
-
+from aima.utils import argmax, vector_add, MCT_Node, ucb
 
 def minimax_decision(state, game):
     """Given a state in a game, calculate the best move by searching
