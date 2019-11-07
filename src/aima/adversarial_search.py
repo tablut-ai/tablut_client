@@ -2,6 +2,7 @@ from collections import namedtuple
 import random
 import itertools
 import copy
+from math import inf
 from aima.utils import argmax, vector_add, MCT_Node, ucb
 
 def minimax_decision(state, game):

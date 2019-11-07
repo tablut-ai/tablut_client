@@ -12,33 +12,15 @@ from collections import OrderedDict, namedtuple
 
 # Lists of possible moves for each piece type.
 
-
-
 MATE_LOWER = 0
 MATE_UPPER = 0
-
 
 # The table size is the maximum number of elements in the transposition table.
 TABLE_SIZE = 1e8
 
-
 # Constants for tuning search
 QSearch_LIMIT = 150
 EVAL_ROUGHNESS = 20
-
-
-###############################################################################
-# Tablut logic
-###############################################################################
-
-
-class Position():
-
-    def move(self,move):
-
-    return Position()
-
-
 
 ###############################################################################
 # Search logic
@@ -47,9 +29,9 @@ class Position():
 # lower <= s(pos) <= upper
 Entry = namedtuple('Entry', 'lower upper')
 
-
 class LRUCache:
     '''Store items in the order the keys were last added'''
+
     def __init__(self, size):
         self.od = OrderedDict()
         self.size = size
@@ -67,6 +49,7 @@ class LRUCache:
         self.od[key] = value
 
 class Searcher:
+
     def __init__(self):
         self.tp_score = LRUCache(TABLE_SIZE)
         self.tp_move = LRUCache(TABLE_SIZE)
@@ -153,8 +136,6 @@ class Searcher:
 
             score = self.bound(pos, lower, depth)
 
-
-
     def search(self, pos, secs):
         start = time.time()
         for _ in self._search(pos):
@@ -162,4 +143,3 @@ class Searcher:
                 break
 
         return self.tp_move.get(pos), self.tp_score.get((pos, self.depth, True)).lower
-

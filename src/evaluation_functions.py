@@ -1,5 +1,12 @@
 #Evaluation functions 
 
+def evaluation_fn(game, material_w=1, free_w=1, escapes_w=1):
+    Pawns = Board_Reader(state)
+    val = material_w * Material(Pawns) + free_w * Free_Sides(state, Pawns) + escapes_w * Reachable_Escapes(state, Pawns)
+    if game.turn == "white":
+        return val
+    return - val
+
 def Board_Reader(state):
     """
     Board_Reader(state) returns a dictionary containing the number of W and B knights and the king position
@@ -69,66 +76,3 @@ def Reachable_Escapes(state, Pawns):
             escapes += 1
         
     return escapes
-
-
-
-def Ev_Fn_White(state):
-    """
-    --------------
-    White Player
-    --------------
-    Evaluation function  with unitary weights for:
-    1) Material
-    2) Free Sides
-    3) Reachable Escapes
-    """
-    Pawns = Board_Reader(state)
-
-    return Material(Pawns) + Free_Sides(state, Pawns) + Reachable_Escapes(state, Pawns)
-
-
-def W_Ev_Fn_White(state, weights):
-    """
-    --------------
-    White Player
-    --------------
-    Evaluation function with fixed weights for:
-    1) Material (weights[0])
-    2) Free Sides (weights[1])
-    3) Reachable Escapes (weights[2])
-    """
-    Pawns = Board_Reader(state)
-
-    return weights[0] * Material(Pawns) + weights[1] * Free_Sides(state, Pawns) + weights[2] * Reachable_Escapes(state, Pawns)
-
-
-def Ev_Fn_Black(state):
-    """
-    --------------
-    Black Player
-    --------------
-    Evaluation function  with unitary weights for:
-    1) Material
-    2) Free Sides
-    3) Reachable Escapes
-    """
-    Pawns = Board_Reader(state)
-
-    return  (-1) * (Material(Pawns) + Free_Sides(state, Pawns) + Reachable_Escapes(state, Pawns)) 
-
-
-def W_Ev_Fn_Black(state, weights):
-    """
-    --------------
-    Black Player
-    --------------
-    Evaluation function with fixed weights for:
-    1) Material (weights[0])
-    2) Free Sides (weights[1])
-    3) Reachable Escapes (weights[2])
-    """
-    Pawns = Board_Reader(state)
-
-    return (-1) * (weights[0] * Material(Pawns) + weights[1] * Free_Sides(state, Pawns) + weights[2] * Reachable_Escapes(state, Pawns)) 
-
-    

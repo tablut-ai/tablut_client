@@ -1,11 +1,13 @@
 import socket
 import json
 import sys
-from game import next_move
+from game import TablutGame
 
 def main():
     host, port, color = parse_arg()
     client = Client(host, port)
+    game = TablutGame()
+
     try:
         # present name
         client.send_name("Ragnarok")
@@ -16,7 +18,7 @@ def main():
         while True:
             print(state)
             if color.upper() == state["turn"]:
-                move = next_move(state)
+                move = game.next_move(state)
                 client.send_move(move)
             state = client.recv_state()
 
