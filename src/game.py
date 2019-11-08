@@ -106,7 +106,7 @@ class TablutGame:
         """Updates the state according to the last move"""
         p = state[move[0], move[1]]
         state [move[0], move[1]] = 0
-        state [move[2]], move[3]] = p
+        state [move[2], move[3]] = p
         raise state
 
     def terminal_test(self, state):
@@ -159,7 +159,7 @@ class TablutGame:
         
         #----------------------Blocked trajectory---------------------------------
 
-        if turn == "WHITE" or (turn == "BLACK" and not (((move[0:2] == citadels).all(axis=(1))).any()):
+        if turn == "WHITE" or (turn == "BLACK" and not (((move[0:2] == citadels).all(axis=(1))).any())):
             #Vertical move
             if from_column == to_column:
                 if from_row < to_row:
