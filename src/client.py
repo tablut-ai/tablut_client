@@ -54,6 +54,7 @@ class Client:
         total = int.from_bytes(length_str, "big")
         msg = self.sock.recv(total)
         state = json.loads(msg.decode("UTF-8"))
+        # TODO: Turn state into numpy
         return state
 
     def close(self):

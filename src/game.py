@@ -3,41 +3,11 @@ from evaluation_functions import evaluation_fn
 
 class TablutGame:
 
-    def __init__(self):
-        self.c=0
-
     # invoked by the game loop
     def next_move(self, state):
-        '''
         depth = 4 
         move = alphabeta_cutoff_search(state, self, depth, cutoff_test=None, eval_fn=evaluation_fn)
         return self.parse_move(move)
-        '''
-        if state["turn"] == "WHITE" and self.c == 0:
-            self.c+=1
-            return self.parse_move({
-                "from": [4, 5],
-                "to": [5, 5]
-            })
-        if state["turn"] == "BLACK" and self.c == 0:
-            self.c+=1
-            return self.parse_move({
-                "from": [0, 5],
-                "to": [0, 7]
-            })
-        if state["turn"] == "WHITE" and self.c == 1:
-            self.c+=1
-            self.check_move(state, {
-                "from": [5, 5],
-                "to": [0, 5]
-            })
-            return self.parse_move({
-                "from": [5, 5],
-                "to": [0, 5]
-            })
-
-
-        print("=====================================")
 
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
@@ -47,7 +17,7 @@ class TablutGame:
         p = state["board"][move["from"][0]][move["from"][1]]
         state["board"][move["from"][0]][move["from"][1]] = "O"
         state["board"][move["to"][0]][move["to"][1]] = p
-        raise state
+        return state
 
     def terminal_test(self, state):
         """Return True if this is a final state for the game."""
@@ -63,7 +33,6 @@ class TablutGame:
         }
 
     def check_move(self, state, move):
-
         from_row = move["from"][0]
         from_column = move["from"][1]
         to_row = move["to"][0] 
