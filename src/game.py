@@ -14,32 +14,23 @@ class TablutGame:
         move = alphabeta_cutoff_search(state, self, depth, cutoff_test=None, eval_fn=evaluation_fn)
         return self.parse_move(move)
         '''
-        if state["turn"] == "WHITE" and self.c == 0:
+        if turn == "WHITE" and self.c == 0:
             self.c+=1
-            return self.parse_move({
-                "from": [4, 5],
-                "to": [5, 5]
-            })
-        if state["turn"] == "BLACK" and self.c == 0:
+            self.check_move(state, np.array([[4,6],[5,6]]), turn)
+            return self.parse_move(np.array([[4,6],[5,6]]))
+            
+        if turn== "BLACK" and self.c == 0:
             self.c+=1
-            return self.parse_move({
-                "from": [0, 5],
-                "to": [0, 7]
-            })
-        if state["turn"] == "WHITE" and self.c == 1:
+            self.check_move(state, np.array([[0,5],[0,7]]), turn)
+            return self.parse_move(np.array([[0,5],[0,7]]))
+
+        if turn == "WHITE" and self.c == 1:
             self.c+=1
-            self.check_move(state, {
-                "from": [5, 5],
-                "to": [0, 5]
-            })
-            return self.parse_move({
-                "from": [5, 5],
-                "to": [0, 5]
-            })
+            self.check_move(state, np.array([[4,5],[0,5]]), turn)
+            return self.parse_move(np.array([[4,5],[0,5]]))
 
 
         print("=====================================")
-
 
     def white_moves_set(self, state, turn):
         """
@@ -104,9 +95,9 @@ class TablutGame:
 
     def result(self, state, move):
         """Updates the state according to the last move"""
-        p = state[move[0], move[1]]
-        state [move[0], move[1]] = 0
-        state [move[2], move[3]] = p
+        p = state[move[0,0], move[0,1]]
+        state [move[0,0], move[0,1]] = 0
+        state [move[1,0], move[1,1]] = p
         raise state
 
     def terminal_test(self, state):
@@ -118,16 +109,16 @@ class TablutGame:
 
     def parse_move(self, move):
         return {
-            "from": chr(97 + move[1]) + str(move[0]+1),
-            "to": chr(97 + move[3]) + str(move[2]+1)
+            "from": chr(97 + move[0,1]) + str(move[0,0]+1),
+            "to": chr(97 + move[1,1]) + str(move[1,0]+1)
         }
-
     def check_move(self, state, move, turn):
 
-        from_row = move[0]
-        from_column = move[1]
-        to_row = move[2] 
-        to_column = move[3] 
+        from_row = move[0,0]
+        from_column = move[0,1]
+        to_row = move[1,0] 
+        to_column = move[1,1] 
+        
 
         #----------------------Diagonal move-----------------------------
         if from_row != to_row and from_column != to_column :
@@ -135,7 +126,8 @@ class TablutGame:
             return False
 
         #------------------------Throne----------------------------------
-        if move[2:] == [4,4] :
+        throne = np.array([4,4])
+        if np.array_equal(move[1], throne) :
             print("Trono")
             return False
 
@@ -148,67 +140,69 @@ class TablutGame:
         citadels = np.array([[0,3], [0,4], [0,5], [1,4], [8,3], [8,4], [8,5], [7,4]])
 
         if turn == "WHITE" :
-            if (((move[2:] == citadels).all(axis=(1))).any()):
+            if (((move[1] == citadels).all(axis=(1))).any()):
                 print("Bianco in Accampamento")
                 return False
 
         if turn == "BLACK" :
-            if not (((move[0:2] == citadels).all(axis=(1))).any())  and (((move[2:] == citadels).all(axis=(1))).any()) :
+            if not (((move[0] == citadels).all(axis=(1))).any())  and (((move[1] == citadels).all(axis=(1))).any()) :
                 print("Nero uscito che torna in accampamento")
                 return False
         
         #----------------------Blocked trajectory---------------------------------
 
-        if turn == "WHITE" or (turn == "BLACK" and not (((move[0:2] == citadels).all(axis=(1))).any())):
+        #AGGIUNGI IL TRONO e CONTROLLA (move[1] == citadels).all(axis=(1))).any())
+
+        if turn == "WHITE" or (turn == "BLACK" and not (((move[0] == citadels).all(axis=(1))).any())):
             #Vertical move
             if from_column == to_column:
                 if from_row < to_row:
                     for i in range(to_row, from_row, -1) :
-                        if (state [i, to_column] != 0) or (((state [i, to_column] == citadels).all(axis=(1))).any()):
+                        if (state [i, to_column] != 0) or ((( np.array([i, to_column]) == citadels).all(axis=(1))).any()) or np.array_equal(np.array([i, to_column]), throne):
                             print("Altra pedina o accampamento lungo la traiettoria")
                             return False
                 if from_row > to_row:
                     for i in range(to_row, from_row):
-                        if (state[i, to_column] != 0) or (((state [i, to_column] == citadels).all(axis=(1))).any()):
+                        if (state[i, to_column] != 0) or (((np.array([i, to_column])== citadels).all(axis=(1))).any()) or np.array_equal(np.array([i, to_column]), throne):
                             print("Altra pedina o accampamento lungo la traiettoria")
                             return False                
             #Horizontal move
             if from_row == to_row:
                 if from_column < to_column:
                     for i in range(to_column, from_column, -1) :
-                        if (state [to_row, i] != 0) or (((state [to_row, i] == citadels).all(axis=(1))).any()):
+                        if (state [to_row, i] != 0) or (((np.array([to_row, i]) == citadels).all(axis=(1))).any()) or np.array_equal(np.array([to_row, i]), throne):
                             print("Altra pedina o accampamento lungo la traiettoria")
                             return False
                 if from_column > to_column:
                     for i in range(to_column, from_column):
-                        if (state [to_row, i] != 0) or (((state [to_row, i] == citadels).all(axis=(1))).any()):
+                        if (state [to_row, i] != 0) or (((np.array([to_row, i])  == citadels).all(axis=(1))).any()) or np.array_equal(np.array([to_row, i]), throne):
                             print("Altra pedina lungo o accampamento la traiettoria")
                             return False 
 
-        if turn == "BLACK" and (((move[0:2] == citadels).all(axis=(1))).any()):
+        if turn == "BLACK" and (((move[0] == citadels).all(axis=(1))).any()):
             #Vertical move
             if from_column == to_column:
                 if from_row < to_row:
                     for i in range(to_row, from_row, -1) :
-                        if state [i, to_column] != 0 :
+                        if state [i, to_column] != 0 or np.array_equal(np.array([i, to_column]), throne):
                             print("Altra pedina lungo la traiettoria")
                             return False
                 if from_row > to_row:
                     for i in range(to_row, from_row):
-                        if state [i, to_column] != 0 :
+                        if state [i, to_column] != 0 or np.array_equal(np.array([i, to_column]), throne):
                             print("Altra pedina lungo la traiettoria")
                             return False                
             #Horizontal move
             if from_row == to_row:
                 if from_column < to_column:
                     for i in range(to_column, from_column, -1) :
-                        if state [to_row, i] != 0 :
+                        if state [to_row, i] != 0 or np.array_equal(np.array([to_row, i]), throne):
                             print("Altra pedina lungo la traiettoria")
                             return False
                 if from_column > to_column:
-                    for i in range(to_column, from_column):
-                        if state [to_row, i] != 0 :
+                    for i in range(to_column, from_column) :
+                        if state [to_row, i] != 0 or np.array_equal(np.array([to_row, i]), throne):
                             print("Altra pedina lungo la traiettoria")
                             return False 
-
+        
         return True
