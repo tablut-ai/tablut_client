@@ -40,12 +40,12 @@ class TablutGame:
 
         #----------------------Diagonal move-----------------------------
         if from_row != to_row and from_column != to_column :
-            print("Diagonale")
+            #print("Diagonale")
             return False
 
         #------------------------Throne----------------------------------
         if move["to"] == [4,4] :
-            print("Trono")
+            #print("Trono")
             return False
 
         #-------------------------Citadels---------------------------------
@@ -53,18 +53,18 @@ class TablutGame:
 
         if state["turn"]== "WHITE" :
             if move["to"] in citadels:
-                print("Bianco in Accampamento")
+                #print("Bianco in Accampamento")
                 return False
 
         if state["turn"]== "BLACK" :
             if not (move["from"] in citadels) and move["to"] in citadels :
-                print("Nero uscito che torna in accampamento")
+                #print("Nero uscito che torna in accampamento")
                 return False
         
         #----------------------Other Pawns---------------------------------
         
         if state["board"] [to_row] [to_column] != "O" :
-            print("Posizione di arrivo occupata")
+            #print("Posizione di arrivo occupata")
             return False
 
         if state["turn"]== "WHITE" :
@@ -73,24 +73,24 @@ class TablutGame:
                 if from_row < to_row:
                     for i in range(to_row, from_row, -1) :
                         if (state["board"][i][to_column] != "O") and (state["board"][i][to_column] in citadels):
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False
                 if from_row > to_row:
                     for i in range(to_row, from_row):
                         if (state["board"][i][to_column]) != "O" and (state["board"][i][to_column] in citadels):
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False                
             #Horizontal move
             if from_row == to_row:
                 if from_column < to_column:
                     for i in range(to_column, from_column, -1) :
                         if (state["board"][to_row][i] != "O") and (state["board"][to_row][i] in citadels):
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False
                 if from_column > to_column:
                     for i in range(to_column, from_column):
                         if (state["board"][to_row] [i] != "O") and (state["board"][to_row][i] in citadels):
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False 
 
         if state["turn"]== "BLACK" and move["from"] in citadels:
@@ -99,24 +99,24 @@ class TablutGame:
                 if from_row < to_row:
                     for i in range(to_row, from_row, -1) :
                         if state["board"][i][to_column] != "O" :
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False
                 if from_row > to_row:
                     for i in range(to_row, from_row):
                         if state["board"][i][to_column] != "O" :
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False                
             #Horizontal move
             if from_row == to_row:
                 if from_column < to_column:
                     for i in range(to_column, from_column, -1) :
                         if state["board"][to_row][i] != "O" :
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False
                 if from_column > to_column:
                     for i in range(to_column, from_column):
                         if state["board"][to_row][i] != "O" :
-                            print("Altra pedina lungo la traiettoria")
+                            #print("Altra pedina lungo la traiettoria")
                             return False 
 
         return True

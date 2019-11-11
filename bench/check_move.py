@@ -1,12 +1,13 @@
-import timeit
-import sys, os
+import sys, os, timeit
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 from game import TablutGame
 
 def main():
 
     setup = "\
+from native.state import cresult \n\
 from random import randrange \n\
+import numpy as np \n\
 from game import TablutGame \n\
 game = TablutGame() \n\
 state = {'board': [ \n\
@@ -26,11 +27,16 @@ state = {'board': [ \n\
 
     result = 'game.result(state, {"from": [randrange(8), randrange(8)], "to": [randrange(8), randrange(8)]})'
 
-    print("====== Benchmark game.check_move =====")
-    print(avg_time(check_move, setup, 100000))
+    cresult = 'cresult(np.array([randrange(8), randrange(8), randrange(8), randrange(8)]))'
+
+    #print("====== Benchmark game.check_move =====")
+    #print(avg_time(check_move, setup, 200000))
 
     print("====== Benchmark game.result =====")
-    print(avg_time(result, setup, 100000))
+    print(avg_time(result, setup, 200000))
+
+    print("====== Benchmark cython game.result =====")
+    print(avg_time(cresult, setup, 200000))
 
     print("====== All benchmark completed! =====")
 

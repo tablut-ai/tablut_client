@@ -1,2 +1,6 @@
 __pycache__/
 .vscode/
+src/native/build/
+
+*.c
+*.so
