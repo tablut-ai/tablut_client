@@ -10,27 +10,25 @@ from random import randrange \n\
 import numpy as np \n\
 from game import TablutGame \n\
 game = TablutGame() \n\
-state = {'board': [ \n\
-    ['O', 'O', 'O', 'B', 'B', 'B', 'O', 'O', 'O'], \n\
-    ['O', 'O', 'O', 'O', 'B', 'O', 'O', 'O', 'O'], \n\
-    ['O', 'O', 'O', 'O', 'W', 'O', 'O', 'O', 'O'], \n\
-    ['B', 'O', 'O', 'O', 'W', 'O', 'O', 'O', 'B'], \n\
-    ['B', 'B', 'W', 'W', 'K', 'W', 'W', 'B', 'B'], \n\
-    ['B', 'O', 'O', 'O', 'W', 'B', 'O', 'O', 'B'], \n\
-    ['O', 'O', 'O', 'O', 'W', 'O', 'O', 'O', 'O'], \n\
-    ['O', 'O', 'O', 'O', 'B', 'O', 'O', 'O', 'O'], \n\
-    ['O', 'O', 'O', 'B', 'B', 'B', 'O', 'O', 'O']  \n\
-    ], 'turn': 'WHITE' \n\
-}"
+state = np.array([ \n\
+    [0, 0, 0, -1, -1, -1, 0, 0, 0], \n\
+    [0, 0, 0, 0, -1, 0, 0, 0, 0], \n\
+    [0, 0, 0, 0, 1, 0, 0, 0, 0], \n\
+    [-1, 0, 0, 0, 1, 0, 0, 0,-1], \n\
+    [-1, -1, 1, 1, 2, 1, 1, -1, -1], \n\
+    [-1, 0, 0, 0, 1, 0, 0, 0, -1], \n\
+    [0, 0, 0, 0, 1, 0, 0, 0, 0], \n\
+    [0, 0, 0, 0, -1, 0, 0, 0, 0], \n\
+    [0, 0, 0, -1, -1, -1, 0, 0, 0]])"
 
-    check_move = 'game.check_move(state, {"from": [randrange(8), randrange(8)], "to": [randrange(8), randrange(8)]})'
+    check_move = 'game.check_move(state, np.array([[randrange(8), randrange(8)], [randrange(8), randrange(8)]]), "WHITE")'
 
-    result = 'game.result(state, {"from": [randrange(8), randrange(8)], "to": [randrange(8), randrange(8)]})'
+    result = 'game.result(state, np.array([[randrange(8), randrange(8)], [randrange(8), randrange(8)]]))'
 
     cresult = 'cresult(np.array([randrange(8), randrange(8), randrange(8), randrange(8)]))'
 
-    #print("====== Benchmark game.check_move =====")
-    #print(avg_time(check_move, setup, 200000))
+    print("====== Benchmark game.check_move =====")
+    print(avg_time(check_move, setup, 200000))
 
     print("====== Benchmark game.result =====")
     print(avg_time(result, setup, 200000))

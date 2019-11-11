@@ -2,6 +2,7 @@ import socket
 import json
 import sys
 from game import TablutGame
+import numpy as np
 
 def main():
     host, port, color = parse_arg()
@@ -12,15 +13,14 @@ def main():
         # present name
         client.send_name("Ragnarok")
         # wait init state
-        state = client.recv_state()
-
+        state, turn  = client.recv_state()
         # game loop:
         while True:
             print(state)
-            if color.upper() == state["turn"]:
-                move = game.next_move(state)
+            if color.upper() == turn:
+                move = game.next_move(state, turn)
                 client.send_move(move)
-            state = client.recv_state()
+            state, turn  = client.recv_state()
 
     finally:
         print('closing socket')
@@ -53,9 +53,19 @@ class Client:
         length_str = char + self.sock.recv(1)
         total = int.from_bytes(length_str, "big")
         msg = self.sock.recv(total)
-        state = json.loads(msg.decode("UTF-8"))
-        # TODO: Turn state into numpy
-        return state
+        state_obj = json.loads(msg.decode("UTF-8"))
+        board = np.array(state_obj["board"])
+        turn = state_obj["turn"]
+        state = np.zeros((9,9), dtype = int)
+        for i in range(9):
+            for j in range(9):
+                if board[i,j] == "BLACK":
+                    state[i,j] = -1
+                if board[i,j] == "WHITE":
+                    state[i,j] = 1
+                if board[i,j] == "KING":
+                    state[i,j] = 2
+        return state, turn
 
     def close(self):
         self.sock.close()
