@@ -47,25 +47,24 @@ class Client:
         self.sock.sendall(length+encoded)
 
     def recv_state(self):
-def recv_state(self):
-    char = self.sock.recv(1)
-    while(char == b'\x00'):
         char = self.sock.recv(1)
-    length_str = char + self.sock.recv(1)
-    total = int.from_bytes(length_str, "big")
-    msg = self.sock.recv(total)
-    board = np.array(json.loads(msg.decode("UTF-8"))["board"])
-    turn = json.loads(msg.decode("UTF-8"))["turn"]
-    state = np.zeros((9,9), dtype = int)
-    for i in range(9):
-        for j in range(9):
-            if board[i,j] == "BLACK":
-                state[i,j] = -1
-            if board[i,j] == "WHITE":
-                state[i,j] = 1
-            if board[i,j] == "KING":
-                state[i,j] = 2
-    return state, turn
+        while(char == b'\x00'):
+            char = self.sock.recv(1)
+        length_str = char + self.sock.recv(1)
+        total = int.from_bytes(length_str, "big")
+        msg = self.sock.recv(total)
+        board = np.array(json.loads(msg.decode("UTF-8"))["board"])
+        turn = json.loads(msg.decode("UTF-8"))["turn"]
+        state = np.zeros((9,9), dtype = int)
+        for i in range(9):
+            for j in range(9):
+                if board[i,j] == "BLACK":
+                    state[i,j] = -1
+                if board[i,j] == "WHITE":
+                    state[i,j] = 1
+                if board[i,j] == "KING":
+                    state[i,j] = 2
+        return state, turn
 
     def close(self):
         self.sock.close()
