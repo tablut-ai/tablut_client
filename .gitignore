@@ -1,6 +1,8 @@
-__pycache__/
+#ide
 .vscode/
-src/native/build/
-
+#python
+__pycache__/
+#cython
+src/game/build/
 *.c
 *.so

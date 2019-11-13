@@ -1,24 +1,24 @@
 import socket
 import json
 import sys
-from game import TablutGame
+from game.game_numpy import GameNumpy
 import numpy as np
 
 def main():
     host, port, color = parse_arg()
     client = Client(host, port)
-    game = TablutGame()
+    game = GameNumpy()
 
     try:
         # present name
         client.send_name("Ragnarok")
         # wait init state
-        state, turn  = client.recv_state()
+        state, turn = client.recv_state()
         # game loop:
         while True:
             print(state)
             if color.upper() == turn:
-                move = game.next_move(state, turn)
+                move = next_move(game, state, turn)
                 client.send_move(move)
             state, turn  = client.recv_state()
 
@@ -42,7 +42,11 @@ class Client:
         self.sock.sendall(length+encoded)
 
     def send_move(self, move):
-        encoded = json.dumps(move).encode("UTF-8")
+        move_obj = {
+            "from": chr(97 + move[0,1]) + str(move[0,0]+1),
+            "to": chr(97 + move[1,1]) + str(move[1,0]+1)
+        }
+        encoded = json.dumps(move_obj).encode("UTF-8")
         length = len(encoded).to_bytes(4, 'big')
         self.sock.sendall(length+encoded)
 
