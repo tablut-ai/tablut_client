@@ -16,8 +16,8 @@ def main():
         state, turn  = client.recv_state()
         # game loop:
         while True:
-            print(state)
-            if color.upper() == turn:
+            print("BOARD", state)
+            if color == turn:
                 move = game.next_move(state, turn)
                 client.send_move(move)
             state, turn  = client.recv_state()
@@ -53,9 +53,13 @@ class Client:
         length_str = char + self.sock.recv(1)
         total = int.from_bytes(length_str, "big")
         msg = self.sock.recv(total)
-        board = np.array(json.loads(msg.decode("UTF-8"))["board"])
-        turn = json.loads(msg.decode("UTF-8"))["turn"]
+        
+        turn = 1
+        if json.loads(msg.decode("UTF-8"))["turn"] == "BLACK":
+            turn = -1
+
         state = np.zeros((9,9), dtype = int)
+        board = np.array(json.loads(msg.decode("UTF-8"))["board"])
         for i in range(9):
             for j in range(9):
                 if board[i,j] == "BLACK":
@@ -64,6 +68,7 @@ class Client:
                     state[i,j] = 1
                 if board[i,j] == "KING":
                     state[i,j] = 2
+
         return state, turn
 
     def close(self):
@@ -82,9 +87,9 @@ def parse_arg():
 
     color=sys.argv[2]
     if color == "white":
-        return (sys.argv[1], 5800, color)
+        return (sys.argv[1], 5800, 1)
     elif color == "black":
-        return (sys.argv[1], 5801, color)
+        return (sys.argv[1], 5801, -1)
     else:
         usage()
         exit(1)
