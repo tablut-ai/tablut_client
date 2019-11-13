@@ -39,6 +39,6 @@ state = np.array([ \n\
     print("====== All benchmark completed! =====")
 
 def avg_time(stm, setup, n):
-    return timeit.timeit(stm, setup=setup, number=n) / n * 1e6
+    return str(timeit.timeit(stm, setup=setup, number=n) / n * 1e6) + " us"
 
 if __name__ == '__main__': main()
