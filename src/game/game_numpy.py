@@ -1,6 +1,5 @@
-from aima.adversarial_search import alphabeta_cutoff_search
-from evaluation_functions import evaluation_fn
 import numpy as np
+import math
 
 class GameNumpy:
 
@@ -8,27 +7,25 @@ class GameNumpy:
         moves = []
         for row in range(9):
             for col in range(9):
-                if (state[row, col] > 0 and turn == 1) or (state[row, col] == 0 and turn == -1)
+                if (state[row, col] > 0 and turn == 1) or (state[row, col] == -1 and turn == -1):
                     for new_col in range(8, col, -1):
-                        if self.check_moves(state,[row, col, row, new_col], turn):
-                            moves.append([row, col, row, new_col])
+                        if self._check_move(state, np.array([[row, col], [row, new_col]]), turn):
+                            moves.append([[row, col], [row, new_col]])
                     for new_col in range(0, col):
-                        if self.check_moves(state,[row, col, row, new_col], turn):
-                            moves.append([row, col, row, new_col])
+                        if self._check_move(state, np.array([[row, col], [row, new_col]]), turn):
+                            moves.append([[row, col], [row, new_col]])
                     for new_row in range(8, row, -1):                        
-                        if self.check_moves(state, [row, col, new_row, col], turn):
-                            moves.append([row, col, new_row, col])
+                        if self._check_move(state, np.array([[row, col], [new_row, col]]), turn):
+                            moves.append([[row, col], [new_row, col]])
                     for new_row in range(0, row):
-                        if self.check_moves(state, [row, col, new_row, col], turn):
-                            moves.append([row, col, new_row, col])
+                        if self._check_move(state, np.array([[row, col], [new_row, col]]), turn):
+                            moves.append([[row, col], [new_row, col]])
 
         return np.array(moves)
 
 
-    def result(self, state, move):
+    def result(self, state, move, turn):
         """Updates the state according to the last move for tree generation"""
-        print("MOSSA", move)
-
         state [move[1,0], move[1,1]] = state[move[0,0], move[0,1]]
         state [move[0,0], move[0,1]] = 0
     
@@ -42,14 +39,14 @@ class GameNumpy:
         
 
     def terminal_test(self, state, turn, move):
-        """Return True if this is a final state for the game."""
+        """Return +/- inf if this is a final state for the game."""
         if turn == 1:
-            return self._king_escape(state, move)
+            return math.inf if self._king_escape(state, move) else 0
         else:
-            return self._capture_king(state, move)
+            return -math.inf if self._capture_king(state, move) else 0
 
 
-#============== CATTURA MULTIPLA???? ===============================
+    ### TODO: CATTURA MULTIPLA?
     def _black_capture_white(self, state, move):
 
         my_row = move[1,0]
@@ -276,12 +273,11 @@ class GameNumpy:
         return False
         
     def _check_move(self, state, move, turn):
-
         from_row = move[0,0]
         from_column = move[0,1]
         to_row = move[1,0] 
         to_column = move[1,1] 
-        
+
         #----------------------Diagonal move-----------------------------
         if from_row != to_row and from_column != to_column :
             return False
