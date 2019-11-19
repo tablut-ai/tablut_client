@@ -1,16 +1,16 @@
 import numpy as np
 from math import inf
 
-def start_search(game, state, turn, eval_fn):
+def start_search(game, state, turn, heuristic):
     depth=2
-    return alphabeta_cutoff_search(game, state, turn, depth, eval_fn)
+    return alphabeta_cutoff_search(game, state, turn, depth, heuristic)
 
-def alphabeta_cutoff_search(game, state, turn, max_depth, eval_fn):
+def alphabeta_cutoff_search(game, state, turn, max_depth, heuristic):
 
     def max_value(game, state, turn, move, alpha, beta, depth):
         terminal = game.terminal_test(state, turn, move)
         if depth > max_depth or terminal != 0:
-            return eval_fn(state, turn) + terminal
+            return heuristic.eval_fn(state, turn) + terminal
         v = -inf
         for a in game.actions(state, turn):
             v = max(v, min_value(game, game.result(np.copy(state), a, turn), turn, move,
@@ -23,7 +23,7 @@ def alphabeta_cutoff_search(game, state, turn, max_depth, eval_fn):
     def min_value(game, state, turn, move, alpha, beta, depth):
         terminal = game.terminal_test(state, turn, move)
         if depth > max_depth or terminal != 0:
-            return eval_fn(state, turn) + terminal
+            return heuristic.eval_fn(state, turn) + terminal
         v = inf
         for a in game.actions(state, turn):
             v = min(v, max_value(game, game.result(np.copy(state), a, turn), turn, move,

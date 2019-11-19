@@ -2,7 +2,7 @@ import socket
 import json
 import sys
 import numpy as np
-from heuristic.eval_numpy import evaluation_fn
+from heuristic.eval_numpy import HeuristicNumpy
 from game.game_numpy import GameNumpy
 from search.alphabeta import start_search
 
@@ -10,6 +10,7 @@ def main():
     host, port, color = parse_arg()
     client = Client(host, port)
     game = GameNumpy()
+    heuristic = HeuristicNumpy()
 
     try:
         # present name
@@ -18,9 +19,9 @@ def main():
         state, turn = client.recv_state()
         # game loop:
         while True:
-            print("BOARD", state)
+            heuristic.update(state)
             if color == turn:
-                move = start_search(game, state, turn, evaluation_fn)
+                move = start_search(game, state, turn, heuristic)
                 client.send_move(move)
             state, turn  = client.recv_state()
 
