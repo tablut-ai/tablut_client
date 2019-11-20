@@ -7,10 +7,9 @@ class ZobristHash:
 
     def compute(self, board):
         h = 0
-        for i in range(8):
-            for j in range(8):
-            # print board[i][j]
-                if board[i][j] != '-':
+        for i in range(9):
+            for j in range(9):
+                if board[i][j] != 0:
                     piece = board[i][j]
                     h ^= self.table[i][j][piece]
         return h

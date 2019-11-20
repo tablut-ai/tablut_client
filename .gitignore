@@ -6,3 +6,5 @@ __pycache__/
 src/game/build/
 *.c
 *.so
+#misc
+*.txt

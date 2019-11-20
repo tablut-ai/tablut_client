@@ -2,28 +2,29 @@ import socket
 import json
 import sys
 import numpy as np
-from heuristic.eval_numpy import HeuristicNumpy
-from game.game_numpy import GameNumpy
-from search.alphabeta import start_search
+from heuristic.eval_obj import HeuristicObj
+from game.game_obj import GameObj
+from search.alphabeta import Search
 
 def main():
     host, port, color = parse_arg()
     client = Client(host, port)
-    game = GameNumpy()
-    heuristic = HeuristicNumpy()
+    game = GameObj()
+    heuristic = HeuristicObj()
+    search = Search()
 
     try:
         # present name
         client.send_name("Ragnarok")
         # wait init state
-        state, turn = client.recv_state()
+        state_np, state_obj, turn = client.recv_state()
         # game loop:
         while True:
-            heuristic.update(state)
+            heuristic.update(state_obj)
             if color == turn:
-                move = start_search(game, state, turn, heuristic)
+                move = search.start(game, state_obj, turn, heuristic)
                 client.send_move(move)
-            state, turn  = client.recv_state()
+            state_np, state_obj, turn  = client.recv_state()
 
     finally:
         print('closing socket')
@@ -44,11 +45,17 @@ class Client:
         length = len(encoded).to_bytes(4, 'big')
         self.sock.sendall(length+encoded)
 
-    def send_move(self, move):
-        move_obj = {
-            "from": chr(97 + move[0,1]) + str(move[0,0]+1),
-            "to": chr(97 + move[1,1]) + str(move[1,0]+1)
-        }
+    def send_move(self, move, t="obj"):
+        if t=="obj":
+            move_obj = {
+                "from": chr(97 + move[0][1]) + str(move[0][0]+1),
+                "to": chr(97 + move[1][1]) + str(move[1][0]+1)
+            }
+        if t=="numpy":
+            move_obj = {
+                "from": chr(97 + move[0,1]) + str(move[0,0]+1),
+                "to": chr(97 + move[1,1]) + str(move[1,0]+1)
+            }   
         encoded = json.dumps(move_obj).encode("UTF-8")
         length = len(encoded).to_bytes(4, 'big')
         self.sock.sendall(length+encoded)
@@ -61,20 +68,26 @@ class Client:
         total = int.from_bytes(length_str, "big")
         msg = self.sock.recv(total)
         state_obj = json.loads(msg.decode("UTF-8"))
-        board = np.array(state_obj["board"])
+        board = state_obj["board"]
         turn = 1 if state_obj["turn"] == "WHITE" else -1
-        state = np.zeros((9,9), dtype = int)
-        board = np.array(json.loads(msg.decode("UTF-8"))["board"])
+
+        state_obj = list(board)
+        state_numpy = np.zeros((9,9), dtype = int)
         for i in range(9):
             for j in range(9):
-                if board[i,j] == "BLACK":
-                    state[i,j] = -1
-                if board[i,j] == "WHITE":
-                    state[i,j] = 1
-                if board[i,j] == "KING":
-                    state[i,j] = 2
+                if state_obj[i][j] == "BLACK":
+                    state_numpy[i,j] = -1
+                    state_obj[i][j] = -1
+                if state_obj[i][j] == "WHITE":
+                    state_numpy[i,j] = 1
+                    state_obj[i][j] = 1
+                if state_obj[i][j] == "KING":
+                    state_numpy[i,j] = 2
+                    state_obj[i][j] = 2
+                if state_obj[i][j] == "EMPTY" or  state_obj[i][j] == "THRONE":
+                    state_obj[i][j] = 0
 
-        return state, turn
+        return state_numpy, state_obj, turn
 
     def close(self):
         self.sock.close()

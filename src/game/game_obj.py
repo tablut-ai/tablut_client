@@ -1,124 +1,267 @@
-from aima.adversarial_search import alphabeta_cutoff_search
-from evaluation_functions import evaluation_fn
-import numpy as np
-
 class GameObj:
 
-    # invoked by the game loop
-    def next_move(self, state):
-        depth = 4 
-        move = alphabeta_cutoff_search(state, self, depth, cutoff_test=None, eval_fn=evaluation_fn)
-        return self.parse_move(move)
+    def __init__(self):
 
-    def actions(self, state):
-        """Return a list of the allowable moves at this point."""
-        raise NotImplementedError
+        self.citadels = [[0,3], [0,4], [0,5], [1,4], 
+                         [8,3], [8,4], [8,5], [7,4], 
+                         [3,8], [4,8], [5,8], [4,7], 
+                         [3,0], [4,0], [5,0], [4,1]]
 
-    def result(self, state, move):
-        p = state[move["from"][0]][move["from"][1]]
-        state[move["from"][0]][move["from"][1]] = "O"
-        state[move["to"][0]][move["to"][1]] = p
-        raise state
+        self.safe_citadels = [[0,3], [0,4], [0,5], 
+                              [8,3], [8,4], [8,5], 
+                              [3,8], [4,8], [5,8], 
+                              [3,0], [4,0], [5,0]]
+        
+        self.throne = [4,4]
 
-    def terminal_test(self, state):
+        self.escapes = [[0,1],[0,2],[0,6],[0,7], 
+                        [8,1],[8,2],[8,6],[8,7],
+                        [1,0],[2,0],[6,0],[7,0],
+                        [1,8],[2,8],[6,8],[7,8]]
+
+    def actions(self, state, turn):
+        moves = []
+        for col in range(9):
+            for row in range(9):
+                if state[row][col] * turn > 0:
+                    mcol = col - 1
+                    while mcol >= 0:
+                        if [row, mcol] == self.throne:
+                            break
+                        if ([row, mcol] in self.citadels and
+                            (turn == 1 or [row, col] not in self.citadels)):
+                            break
+                        if state[row][mcol] != 0:
+                            break
+                        moves.append([[row, col], [row, mcol]])
+                        mcol -= 1
+                    mcol = col +1
+                    while mcol < 9:
+                        if [row, mcol] == self.throne:
+                            break
+                        if ([row, mcol] in self.citadels and
+                            (turn == 1 or [row, col] not in self.citadels)):
+                            break
+                        if state[row][mcol] != 0:
+                            break
+                        moves.append([[row, col], [row, mcol]])
+                        mcol += 1
+
+                    mrow = row - 1
+                    while mrow >= 0:
+                        if [mrow, col] == self.throne:
+                            break
+                        if ([mrow, col] in self.citadels and
+                            (turn == 1 or [row, col] not in self.citadels)):
+                            break
+                        if state[mrow][col] != 0:
+                            break
+                        moves.append([[row, col], [mrow, col]])
+                        mrow -= 1
+                    mrow = row +1
+                    while mrow < 9:
+                        if [mrow, col] == self.throne:
+                            break
+                        if ([mrow, col] in self.citadels and
+                            (turn == 1 or [row, col] not in self.citadels)):
+                            break
+                        if state[mrow][col] != 0:
+                            break
+                        moves.append([[row, col], [mrow, col]])
+                        mrow += 1
+        return moves
+
+    def result(self, state, move, turn):
+        """Updates the state according to the last move for tree generation"""
+        state [move[1][0]][move[1][1]] = state[move[0][0]][move[0][1]]
+        state [move[0][0]][move[0][1]] = 0
+
+        if turn == 1:
+            state = self._white_capture_black(state, move)
+
+        else:
+            state = self._black_capture_white(state, move)
+
+        return state
+
+    def terminal_test(self, state, turn, move):
         """Return True if this is a final state for the game."""
-        return not self.actions(state)
+        if turn == 1:
+            return self._king_escape(state, move)
+        else:
+            return self._capture_king(state, move)
 
-    def to_move(self, state):
-        return state["turn"]
+    def _white_capture_black(self, state, move):
 
-    def parse_move(self, move):
-        return {
-            "from": chr(97 + move["from"][1]) + str(move["from"][0]+1),
-            "to": chr(97 + move["to"][1]) + str(move["to"][0]+1)
-        }
+        my_row = move[1][0]
+        my_column =  move[1][1]
 
-    def check_move(self, state, move, turn):
+        #Capture Down
+        if (my_row < 7 
+            and state[my_row + 1][my_column] == -1 
+            and not [my_row + 1, my_column] in self.safe_citadels
+            and ( state[my_row + 2][my_column] == 1 
+                or [my_row + 2, my_column] in self.citadels
+                or [my_row + 2, my_column] == self.throne)): 
+            
+            state[my_row + 1][my_column] = 0
+            return state
 
-        from_row = move["from"][0]
-        from_column = move["from"][1]
-        to_row = move["to"][0] 
-        to_column = move["to"][1] 
+        #Capture Up
+        if (my_row > 1 
+            and state[my_row - 1][my_column] == -1
+            and not [my_row - 1, my_column] in self.safe_citadels 
+            and ( state[my_row - 2][my_column] == 1 
+                or [my_row - 2, my_column] in self.citadels
+                or [my_row - 2, my_column] == self.throne)):
+            
+            state[my_row - 1][my_column] = 0
+            return state
 
-        #----------------------Diagonal move-----------------------------
-        if from_row != to_row and from_column != to_column :
-            print("Diagonale")
-            return False
-
-        #------------------------Throne----------------------------------
-        if move["to"] == [4,4] :
-            print("Trono")
-            return False
-
-        #-------------------------Citadels---------------------------------
-        citadels = [[0,3], [0,4], [0,5], [1,4], [8,3], [8,4], [8,5], [7,4]]
-
-        if turn== "WHITE" :
-            if move["to"] in citadels:
-                print("Bianco in Accampamento")
-                return False
-
-        if turn== "BLACK" :
-            if not (move["from"] in citadels) and move["to"] in citadels :
-                print("Nero uscito che torna in accampamento")
-                return False
+        #Capture Left
+        if (my_column > 1 
+            and state[my_row][my_column - 1] == -1 
+            and not [my_row, my_column - 1] in self.safe_citadels
+            and ( state[my_row][my_column - 2]  == 1 
+                or [my_row, my_column - 2] in self.citadels
+                or [my_row, my_column - 2] == self.throne)):
+            
+            state[my_row][my_column - 1]  = 0
+            return state
         
-        #----------------------Other Pawns---------------------------------
+        #Capture Right
+        if (my_column < 7 
+            and state[my_row][my_column + 1] == -1 
+            and not [my_row, my_column + 1] in self.safe_citadels
+            and ( state[my_row][my_column + 2]  == 1 
+                or [my_row, my_column + 2] in self.citadels
+                or [my_row, my_column + 2] == self.throne)):
+            
+            state[my_row][my_column + 1]  = 0
+            return state
+
+        return state
+
+    def _black_capture_white(self, state, move):
+
+        my_row = move[1][0]
+        my_column =  move[1][1]
+
+        #Capture Down
+        if (my_row < 7 
+            and state[my_row + 1][my_column] == 1 
+            and ( state[my_row + 2][my_column] == -1 
+                or [my_row + 2, my_column] in self.citadels
+                or [my_row + 2, my_column] == self.throne)): 
+            
+            state[my_row + 1][my_column] = 0
+            return state
+
+        #Capture Up
+        if (my_row > 1 
+            and state[my_row - 1][my_column] == 1 
+            and ( state[my_row - 2][my_column] == -1 
+                or [my_row - 2, my_column] in self.citadels
+                or [my_row - 2, my_column] == self.throne)):
+            
+            state[my_row - 1][my_column] = 0
+            return state
+
+        #Capture Left
+        if (my_column > 1 
+            and state[my_row][my_column - 1] == 1 
+            and ( state[my_row][my_column - 2]  == -1 
+                or [my_row, my_column - 2] in self.citadels
+                or [my_row, my_column - 2] == self.throne)):
+            
+            state[my_row][my_column - 1]  = 0
+            return state
         
-        if state [to_row] [to_column] != "O" :
-            print("Posizione di arrivo occupata")
-            return False
+        #Capture Right
+        if (my_column < 7 
+            and state[my_row][my_column + 1] == 1 
+            and ( state[my_row][my_column + 2]  == -1 
+                or [my_row, my_column + 2] in self.citadels
+                or [my_row, my_column + 2] == self.throne)):
+            
+            state[my_row][my_column + 1]  = 0
+            return state
 
-        if turn== "WHITE" :
-            #Vertical move
-            if from_column == to_column:
-                if from_row < to_row:
-                    for i in range(to_row, from_row, -1) :
-                        if (state[i][to_column] != "O") and (state[i][to_column] in citadels):
-                            print("Altra pedina lungo la traiettoria")
-                            return False
-                if from_row > to_row:
-                    for i in range(to_row, from_row):
-                        if (state[i][to_column]) != "O" and (state[i][to_column] in citadels):
-                            print("Altra pedina lungo la traiettoria")
-                            return False                
-            #Horizontal move
-            if from_row == to_row:
-                if from_column < to_column:
-                    for i in range(to_column, from_column, -1) :
-                        if (state[to_row][i] != "O") and (state[to_row][i] in citadels):
-                            print("Altra pedina lungo la traiettoria")
-                            return False
-                if from_column > to_column:
-                    for i in range(to_column, from_column):
-                        if (state[to_row] [i] != "O") and (state[to_row][i] in citadels):
-                            print("Altra pedina lungo la traiettoria")
-                            return False 
+        return state
 
-        if turn== "BLACK" and move["from"] in citadels:
-                    #Vertical move
-            if from_column == to_column:
-                if from_row < to_row:
-                    for i in range(to_row, from_row, -1) :
-                        if state[i][to_column] != "O" :
-                            print("Altra pedina lungo la traiettoria")
-                            return False
-                if from_row > to_row:
-                    for i in range(to_row, from_row):
-                        if state[i][to_column] != "O" :
-                            print("Altra pedina lungo la traiettoria")
-                            return False                
-            #Horizontal move
-            if from_row == to_row:
-                if from_column < to_column:
-                    for i in range(to_column, from_column, -1) :
-                        if state[to_row][i] != "O" :
-                            print("Altra pedina lungo la traiettoria")
-                            return False
-                if from_column > to_column:
-                    for i in range(to_column, from_column):
-                        if state[to_row][i] != "O" :
-                            print("Altra pedina lungo la traiettoria")
-                            return False 
+    def _capture_king(self, state, move):
 
-        return True
+        my_row = move[1][0]
+        my_column =  move[1][1]
+
+        #King on the throne
+        if (    state[4][4] == 2 
+            and state[4][5] == -1   
+            and state[4][3] == -1 
+            and state[3][4] == -1
+            and state[5][4] == -1):
+            return True
+
+        #King on the right of the throne
+        if (    state[4][5] == 2 
+            and state[3][5] == -1 
+            and state[5][5] == -1 
+            and state[4][6] == -1):
+            return True
+            
+        #King on the left of the throne
+        if (    state[4][3] == 2 
+            and state[3][3] == -1 
+            and state[5][3] == -1 
+            and state[4][2] == -1):
+            return True
+        
+        #King above the throne
+        if (    state[3][4] == 2             
+            and state[3][2] == -1 
+            and state[3][5] == -1 
+            and state[2][4] == -1):
+            return True
+
+        #King below the throne
+        if (    state[5][4] == 2             
+            and state[5][5] == -1 
+            and state[5][3] == -1 
+            and state[6][4] == -1):
+            return True
+                
+        #Capture Down
+        if (    my_row < 7 
+            and state[my_row + 1][ my_column] == 2 
+            and ( state[my_row + 2][ my_column] == -1 or [my_row + 2,my_column] in self.citadels)):
+            return True
+
+        #Capture Up
+        if (my_row > 1 
+            and state[my_row - 1][ my_column] == 2 
+            and (state[my_row - 2][ my_column] == -1 or [my_row - 2, my_column] in self.citadels)):
+            return True
+
+        #Capture Left
+        if (my_column > 1 
+            and state[my_row][ my_column - 1] == 1 
+            and (state[my_row][ my_column - 2 ] == -1 or [my_row, my_column - 2] in self.citadels)):
+            return True
+        
+        #Capture Right
+        if (my_column < 7 
+            and state[my_row][ my_column + 1] == 1 
+            and (state[my_row][ my_column + 2 ] == -1 or [my_row, my_column + 2] in self.citadels)):
+            return True
+        
+        return False
+
+    def _king_escape(self, state, move):
+
+        row = move[1][0]
+        column =  move[1][1]
+        if state[row][ column] == 2 and move[1] in self.escapes:
+            return True
+        
+        return False
+    

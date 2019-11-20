@@ -18,12 +18,23 @@ class HeuristicNumpy:
                 if state[i,j] == 2:
                     self.pawns["K"] = (i,j)
 
-    def eval_fn(self, state, turn, material_w=1, free_w=3, escapes_w=3):
-        return turn * (
-            material_w * self.material() + 
-            free_w * self.free_sides(state) + 
-            escapes_w * self.free_escapes(state))
+    def white_MAX_evaluation_fn(self, game, state, turn, terminal, material_w=1, free_w=8,  escapes_w=10):
+        self.update(state)
 
+        val = (material_w * self.material() + 
+                free_w * self.free_sides(state) + 
+                escapes_w * self.free_escapes(state)) 
+
+        return turn * (val + terminal)
+
+    def black_MAX_evaluation_fn(self, game, state, turn, terminal, material_w=1, free_w=8,  escapes_w=10):
+        self.update(state)
+
+        val = (material_w * self.material() + 
+                free_w * self.free_sides(state) + 
+                escapes_w * self.free_escapes(state)) 
+                
+        return  - turn * (val + terminal)
 
     def material(self):
         """
