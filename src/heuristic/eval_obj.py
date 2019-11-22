@@ -51,5 +51,5 @@ class HeuristicObj:
                 escapes += 1
             if len([state[i][K_column] for i in range(K_row + 1, 9) if state[i][K_column] != 0]) == 0:
                 escapes += 1
-            
+        
         return escapes

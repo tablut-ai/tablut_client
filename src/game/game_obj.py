@@ -84,14 +84,14 @@ class GameObj:
 
         return state
 
-    def terminal_test(self, state):
+    def terminal_test(self, state, color):
         """Return 1 if current turn won, -1 if lose, 0 elsewhere"""
         ke = self._king_escape(state) 
         ck = self._capture_king(state)
 
         if not ke and not ck:
             return 0
-        return -self.color if ke else self.color
+        return color if ke else -color
 
     def _white_capture_black(self, state, move):
 
@@ -192,11 +192,7 @@ class GameObj:
         return state
 
     def _capture_king(self, state):
-        for i in range(9):
-            for j in range(9):
-                if state[i][j] == 2:
-                    my_row = i
-                    my_column = j
+
 
         #King on the throne
         if (    state[4][4] == 2 
@@ -234,30 +230,25 @@ class GameObj:
             and state[6][4] == -1):
             return True
                 
-        #Capture Down
-        if (    my_row < 7 
-            and state[my_row + 1][ my_column] == 2 
-            and ( state[my_row + 2][ my_column] == -1 or [my_row + 2,my_column] in self.citadels)):
-            return True
 
-        #Capture Up
-        if (my_row > 1 
-            and state[my_row - 1][ my_column] == 2 
-            and (state[my_row - 2][ my_column] == -1 or [my_row - 2, my_column] in self.citadels)):
-            return True
+        for i in range(9):
+            for j in range(9):
+                if state[i][j] == 2:
+                    k_row = i
+                    k_column = j
+                    
+                    #Vertical capture
+                    if (k_row < 8 and k_row > 0
+                        and ( state[k_row + 1][ k_column] == -1 or [k_row + 1,k_column] in self.citadels or [k_row + 1,k_column] == self.throne)  
+                        and (state[k_row - 1][ k_column] == -1 or [k_row - 1, k_column] in self.citadels or [k_row - 1,k_column] == self.throne )):
+                        return True
 
-        #Capture Left
-        if (my_column > 1 
-            and state[my_row][ my_column - 1] == 1 
-            and (state[my_row][ my_column - 2 ] == -1 or [my_row, my_column - 2] in self.citadels)):
-            return True
-        
-        #Capture Right
-        if (my_column < 7 
-            and state[my_row][ my_column + 1] == 1 
-            and (state[my_row][ my_column + 2 ] == -1 or [my_row, my_column + 2] in self.citadels)):
-            return True
-        
+                    #Horizontal capture
+                    if (k_column < 8 and k_column > 0
+                        and ( state[k_row][ k_column + 1] == -1 or [k_row, k_column + 1] in self.citadels or [k_row,k_column + 1]  == self.throne)  
+                        and (state[k_row][ k_column - 1] == -1 or [k_row, k_column - 1]  in self.citadels or [k_row, k_column - 1]  == self.throne )):
+                        return True
+                    
         return False
 
     def _king_escape(self, state):
