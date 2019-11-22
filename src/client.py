@@ -2,16 +2,12 @@ import socket
 import json
 import sys
 import numpy as np
-from heuristic.eval_obj import HeuristicObj
-from game.game_obj import GameObj
-from search.alphabeta import Search
+from search.negamax import Search
 
 def main():
     host, port, color = parse_arg()
     client = Client(host, port)
-    game = GameObj()
-    heuristic = HeuristicObj()
-    search = Search()
+    search = Search(color)
 
     try:
         # present name
@@ -20,11 +16,10 @@ def main():
         state_np, state_obj, turn = client.recv_state()
         # game loop:
         while True:
-            heuristic.update(state_obj)
             if color == turn:
-                move = search.start(game, state_obj, turn, heuristic)
+                move = search.start(state_obj)
                 client.send_move(move)
-            state_np, state_obj, turn  = client.recv_state()
+            state_np, state_obj, turn = client.recv_state()
 
     finally:
         print('closing socket')

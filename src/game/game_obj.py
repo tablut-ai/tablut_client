@@ -1,6 +1,7 @@
 class GameObj:
 
-    def __init__(self):
+    def __init__(self, color):
+        self.color = color
 
         self.citadels = [[0,3], [0,4], [0,5], [1,4], 
                          [8,3], [8,4], [8,5], [7,4], 
@@ -19,17 +20,17 @@ class GameObj:
                         [1,0],[2,0],[6,0],[7,0],
                         [1,8],[2,8],[6,8],[7,8]]
 
-    def actions(self, state, turn):
+    def actions(self, state):
         moves = []
         for col in range(9):
             for row in range(9):
-                if state[row][col] * turn > 0:
+                if state[row][col] * self.color > 0:
                     mcol = col - 1
                     while mcol >= 0:
                         if [row, mcol] == self.throne:
                             break
                         if ([row, mcol] in self.citadels and
-                            (turn == 1 or [row, col] not in self.citadels)):
+                            (self.color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[row][mcol] != 0:
                             break
@@ -40,7 +41,7 @@ class GameObj:
                         if [row, mcol] == self.throne:
                             break
                         if ([row, mcol] in self.citadels and
-                            (turn == 1 or [row, col] not in self.citadels)):
+                            (self.color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[row][mcol] != 0:
                             break
@@ -52,7 +53,7 @@ class GameObj:
                         if [mrow, col] == self.throne:
                             break
                         if ([mrow, col] in self.citadels and
-                            (turn == 1 or [row, col] not in self.citadels)):
+                            (self.color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[mrow][col] != 0:
                             break
@@ -63,7 +64,7 @@ class GameObj:
                         if [mrow, col] == self.throne:
                             break
                         if ([mrow, col] in self.citadels and
-                            (turn == 1 or [row, col] not in self.citadels)):
+                            (self.color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[mrow][col] != 0:
                             break
@@ -71,25 +72,26 @@ class GameObj:
                         mrow += 1
         return moves
 
-    def result(self, state, move, turn):
+    def result(self, state, move):
         """Updates the state according to the last move for tree generation"""
-        state [move[1][0]][move[1][1]] = state[move[0][0]][move[0][1]]
-        state [move[0][0]][move[0][1]] = 0
+        state[move[1][0]][move[1][1]] = state[move[0][0]][move[0][1]]
+        state[move[0][0]][move[0][1]] = 0
 
-        if turn == 1:
+        if self.color == 1:
             state = self._white_capture_black(state, move)
-
         else:
             state = self._black_capture_white(state, move)
 
         return state
 
-    def terminal_test(self, state, turn, move):
-        """Return True if this is a final state for the game."""
-        if turn == 1:
-            return self._king_escape(state, move)
-        else:
-            return self._capture_king(state, move)
+    def terminal_test(self, state):
+        """Return 1 if current turn won, -1 if lose, 0 elsewhere"""
+        ke = self._king_escape(state) 
+        ck = self._capture_king(state)
+
+        if not ke and not ck:
+            return 0
+        return -self.color if ke else self.color
 
     def _white_capture_black(self, state, move):
 
@@ -189,10 +191,12 @@ class GameObj:
 
         return state
 
-    def _capture_king(self, state, move):
-
-        my_row = move[1][0]
-        my_column =  move[1][1]
+    def _capture_king(self, state):
+        for i in range(9):
+            for j in range(9):
+                if state[i][j] == 2:
+                    my_row = i
+                    my_column = j
 
         #King on the throne
         if (    state[4][4] == 2 
@@ -256,12 +260,9 @@ class GameObj:
         
         return False
 
-    def _king_escape(self, state, move):
-
-        row = move[1][0]
-        column =  move[1][1]
-        if state[row][ column] == 2 and move[1] in self.escapes:
-            return True
-        
+    def _king_escape(self, state):
+        for escape in self.escapes:
+            if state[escape[0]][escape[1]] == 2:
+                return True
         return False
     
