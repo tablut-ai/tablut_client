@@ -14,7 +14,7 @@ class Search:
         self.eval_fn = self.heuristic.evaluation_fn
 
     def start(self, state):
-        self.depth = 2
+        self.depth = 4
         α = -inf
         β = inf
         move = self.negamax(state, self.depth, α, β, self.game.color)
@@ -27,6 +27,9 @@ class Search:
         entry["move"] = move
         entry["flag"] = flag
         self.tt[state] = entry
+
+    def orderMoves(self, move):
+        return self.hh.get(move)
 
     def negamax(self, state, depth, α, β, color):
 
@@ -49,7 +52,12 @@ class Search:
             return self.eval_fn(state, color)
 
         moves = self.game.actions(state)
-        # moves = orderMoves(moves) 
+
+        for m in moves:
+            self.hh.__setitem__(m, depth)
+
+        moves.sort(key = self.orderMoves)
+        
         v = -inf
         best_move = None
         for m in moves:

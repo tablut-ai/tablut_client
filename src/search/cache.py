@@ -27,17 +27,19 @@ class HistoryHeuristic:
         self.size = size
 
     def get(self, move, default=None):
-        key = move
+        key = (tuple(move[0]),tuple(move[1])) 
         try: self.od[key]
         except KeyError: return default
         return self.od[key]
 
     def __setitem__(self, move, depth):
-        key = move
+        key = (tuple(move[0]),tuple(move[1])) 
         try: self.od[key]
         except KeyError:
             if len(self.od) == self.size:
-                self.od.popitem() #voglio rimpiazzare l'ultima, perchè il dict lo ordino in modo DECRESCENTE (riga 24)        
+                self.od.popitem()
+            self.od[key] = 2**depth 
+            return     
         if 2**depth > self.od[key]:#AGGIORNO LA MOSSA CON DEPTH MAGGIORE? HA SENSO?
             self.od[key] = 2**depth
-        self.od = OrderedDict(sorted(self.od.items())) # NOOOOOOOOOOOOOOOOOOO
+        #self.od = OrderedDict(sorted(self.od.items())) # NOOOOOOOOOOOOOOOOOOO
