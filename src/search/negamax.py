@@ -31,7 +31,7 @@ class Search:
 
         alphaOrig = α
 
-        """
+        
         from_tt = self.tt.get(state) 
         if from_tt != None and from_tt["depth"] >= depth:
             if from_tt["flag"] == 0:
@@ -42,7 +42,7 @@ class Search:
                 β = min(β, from_tt["val"])
             if α >= β:
                 return from_tt["val"]
-        """
+        
 
         terminal = self.game.terminal_test(state, color)
         if terminal != 0:
@@ -65,14 +65,14 @@ class Search:
 
             if α >= β:
                 break
-        """
+        
         if v >= β:
             self.set_tt(state, v, depth, -1)
         elif v <= alphaOrig:
             self.set_tt(state, v, depth, 1)
         else:
             self.set_tt(state, v, depth, 0)
-        """
+        
         if depth == self.depth:
             return best_move
 

@@ -230,24 +230,24 @@ class GameObj:
             and state[6][4] == -1):
             return True
                 
+        if state[4][4] != 2:
+            for i in range(9):
+                for j in range(9):
+                    if state[i][j] == 2:
+                        k_row = i
+                        k_column = j
+                        
+                        #Vertical capture
+                        if (k_row < 8 and k_row > 0
+                            and ( state[k_row + 1][ k_column] == -1 or [k_row + 1,k_column] in self.citadels or [k_row + 1,k_column] == self.throne)  
+                            and (state[k_row - 1][ k_column] == -1 or [k_row - 1, k_column] in self.citadels or [k_row - 1,k_column] == self.throne )):
+                            return True
 
-        for i in range(9):
-            for j in range(9):
-                if state[i][j] == 2:
-                    k_row = i
-                    k_column = j
-                    
-                    #Vertical capture
-                    if (k_row < 8 and k_row > 0
-                        and ( state[k_row + 1][ k_column] == -1 or [k_row + 1,k_column] in self.citadels or [k_row + 1,k_column] == self.throne)  
-                        and (state[k_row - 1][ k_column] == -1 or [k_row - 1, k_column] in self.citadels or [k_row - 1,k_column] == self.throne )):
-                        return True
-
-                    #Horizontal capture
-                    if (k_column < 8 and k_column > 0
-                        and ( state[k_row][ k_column + 1] == -1 or [k_row, k_column + 1] in self.citadels or [k_row,k_column + 1]  == self.throne)  
-                        and (state[k_row][ k_column - 1] == -1 or [k_row, k_column - 1]  in self.citadels or [k_row, k_column - 1]  == self.throne )):
-                        return True
+                        #Horizontal capture
+                        if (k_column < 8 and k_column > 0
+                            and ( state[k_row][ k_column + 1] == -1 or [k_row, k_column + 1] in self.citadels or [k_row,k_column + 1]  == self.throne)  
+                            and (state[k_row][ k_column - 1] == -1 or [k_row, k_column - 1]  in self.citadels or [k_row, k_column - 1]  == self.throne )):
+                            return True
                     
         return False
 
