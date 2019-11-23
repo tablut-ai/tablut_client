@@ -18,7 +18,8 @@ def main():
         while True:
             if color == turn:
                 move = search.start(state_obj)
-                client.send_move(move)
+                if move != None:
+                    client.send_move(move)
             state_np, state_obj, turn = client.recv_state()
 
     finally:
@@ -42,8 +43,6 @@ class Client:
 
     def send_move(self, move, t="obj"):
         if t=="obj":
-            print(move)
-            print(move[0][1],move[0][0],move[1][1], move[1][0])
             move_obj = {
                 "from": chr(97 + move[0][1]) + str(move[0][0]+1),
                 "to": chr(97 + move[1][1]) + str(move[1][0]+1)
