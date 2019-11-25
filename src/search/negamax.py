@@ -51,8 +51,6 @@ class Search:
             return self.eval_fn(state, color, False)
 
         moves = self.game.actions(state, color)
-        for child_move in moves:
-            self.hh[child_move] = depth
         moves.sort(key = self.orderMoves)
         
         best_value = -inf
@@ -79,8 +77,8 @@ class Search:
         else:
             self.set_tt(state, best_value, depth, best_move, 0)
 
-        # Update history score for best move
-        # HistoryTable[ bestmove ] = HistoryTable[ bestmove ] + 2**depth;
+        if color == self.game.color:
+            self.hh[best_move] = 2**depth
         
         return best_move if depth == self.depth else best_value
 

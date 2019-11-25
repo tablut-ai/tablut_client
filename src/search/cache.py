@@ -26,9 +26,11 @@ class HistoryHeuristic:
         self.od = OrderedDict()
         self.size = size
 
-    def get(self, move, default=None):
+    def get(self, move, default=0):
         key = (tuple(move[0]),tuple(move[1])) 
-        try: self.od[key]
+        try: 
+            self.od[key]
+            #print(move, self.od[key], len(self.od))
         except KeyError: return default
         return self.od[key]
 
@@ -38,8 +40,5 @@ class HistoryHeuristic:
         except KeyError:
             if len(self.od) == self.size:
                 self.od.popitem()
-            self.od[key] = 2**depth 
-            return     
-        if 2**depth > self.od[key]:#AGGIORNO LA MOSSA CON DEPTH MAGGIORE? HA SENSO?
-            self.od[key] = 2**depth
-        #self.od = OrderedDict(sorted(self.od.items())) # NOOOOOOOOOOOOOOOOOOO
+            self.od[key] = depth 
+            return 
