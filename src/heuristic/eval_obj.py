@@ -1,6 +1,8 @@
 class HeuristicObj:
 
-    def evaluation_fn(self, state, turn, material_w=1, free_w=8,  escapes_w=10):
+    def evaluation_fn(self, state, turn, terminal, material_w=1, free_w=8,  escapes_w=10):
+        if terminal:
+            return -1e8
         w = 0
         b = 0
         for i in range(9):

@@ -14,7 +14,7 @@ class Search:
         self.eval_fn = self.heuristic.evaluation_fn
 
     def start(self, state):
-        self.depth = 4
+        self.depth = 3
         α = -inf
         β = inf
         move = self.negamax(state, self.depth, α, β, self.game.color)
@@ -32,7 +32,6 @@ class Search:
         return self.hh.get(move)
 
     def negamax(self, state, depth, α, β, color):
-
         alphaOrig = α
         from_tt = self.tt.get(state) 
         if from_tt != None and from_tt["depth"] >= depth:
@@ -46,40 +45,43 @@ class Search:
                 return from_tt["move"] if depth == self.depth else from_tt["val"]
 
         terminal = self.game.terminal_test(state, color)
-        if terminal != 0:
-            return None if depth == self.depth else terminal * (1e8)
+        if terminal:
+            return None if depth == self.depth else self.eval_fn(state, color, True) - depth
         if depth == 0:
-            return self.eval_fn(state, color)
+            return self.eval_fn(state, color, False)
 
-        moves = self.game.actions(state)
-
-        for m in moves:
-            self.hh.__setitem__(m, depth)
-
+        moves = self.game.actions(state, color)
+        for child_move in moves:
+            self.hh[child_move] = depth
         moves.sort(key = self.orderMoves)
         
-        v = -inf
+        best_value = -inf
         best_move = None
-        for m in moves:
-            next_state = self.game.result(deepcopy(state), m)
-            child_v = self.negamax(next_state, depth-1, -β, -α, -color)
+        for child_move in moves:
+            next_state = self.game.result(deepcopy(state), child_move, color)
+            child_value = -self.negamax(next_state, depth-1, -β, -α, -color)
 
-            if -child_v > v:
-                v = -child_v
-                best_move = m
+            if child_value >= best_value:
+                best_value = child_value
+                best_move = child_move
 
-            α = max(α, v)
-
-            if α >= β:
-                break
+            if α < child_value:
+                α = child_value
+                if depth == self.depth:
+                    best_move = child_move
+                if α >= β:
+                    break
         
-        if v >= β:
-            self.set_tt(state, v, depth, best_move, -1)
-        elif v <= alphaOrig:
-            self.set_tt(state, v, depth, best_move, 1)
+        if best_value >= β:
+            self.set_tt(state, best_value, depth, best_move, -1)
+        elif best_value <= alphaOrig:
+            self.set_tt(state, best_value, depth, best_move, 1)
         else:
-            self.set_tt(state, v, depth, best_move, 0)
+            self.set_tt(state, best_value, depth, best_move, 0)
+
+        # Update history score for best move
+        # HistoryTable[ bestmove ] = HistoryTable[ bestmove ] + 2**depth;
         
-        return best_move if depth == self.depth else v
+        return best_move if depth == self.depth else best_value
 
 

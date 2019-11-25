@@ -20,17 +20,17 @@ class GameObj:
                         [1,0],[2,0],[6,0],[7,0],
                         [1,8],[2,8],[6,8],[7,8]]
 
-    def actions(self, state):
+    def actions(self, state, color):
         moves = []
         for col in range(9):
             for row in range(9):
-                if state[row][col] * self.color > 0:
+                if state[row][col] * color > 0:
                     mcol = col - 1
                     while mcol >= 0:
                         if [row, mcol] == self.throne:
                             break
                         if ([row, mcol] in self.citadels and
-                            (self.color == 1 or [row, col] not in self.citadels)):
+                            (color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[row][mcol] != 0:
                             break
@@ -41,7 +41,7 @@ class GameObj:
                         if [row, mcol] == self.throne:
                             break
                         if ([row, mcol] in self.citadels and
-                            (self.color == 1 or [row, col] not in self.citadels)):
+                            (color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[row][mcol] != 0:
                             break
@@ -53,7 +53,7 @@ class GameObj:
                         if [mrow, col] == self.throne:
                             break
                         if ([mrow, col] in self.citadels and
-                            (self.color == 1 or [row, col] not in self.citadels)):
+                            (color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[mrow][col] != 0:
                             break
@@ -64,7 +64,7 @@ class GameObj:
                         if [mrow, col] == self.throne:
                             break
                         if ([mrow, col] in self.citadels and
-                            (self.color == 1 or [row, col] not in self.citadels)):
+                            (color == 1 or [row, col] not in self.citadels)):
                             break
                         if state[mrow][col] != 0:
                             break
@@ -72,12 +72,12 @@ class GameObj:
                         mrow += 1
         return moves
 
-    def result(self, state, move):
+    def result(self, state, move, color):
         """Updates the state according to the last move for tree generation"""
         state[move[1][0]][move[1][1]] = state[move[0][0]][move[0][1]]
         state[move[0][0]][move[0][1]] = 0
 
-        if self.color == 1:
+        if color == 1:
             state = self._white_capture_black(state, move)
         else:
             state = self._black_capture_white(state, move)
@@ -85,13 +85,11 @@ class GameObj:
         return state
 
     def terminal_test(self, state, color):
-        """Return 1 if current turn won, -1 if lose, 0 elsewhere"""
-        ke = self._king_escape(state) 
-        ck = self._capture_king(state)
+        if color == 1:
+            return self._capture_king(state)
+        else :
+            return self._king_escape(state) 
 
-        if not ke and not ck:
-            return 0
-        return color if ke else -color
 
     def _white_capture_black(self, state, move):
 
@@ -192,8 +190,6 @@ class GameObj:
         return state
 
     def _capture_king(self, state):
-
-
         #King on the throne
         if (    state[4][4] == 2 
             and state[4][5] == -1   
