@@ -5,6 +5,7 @@ def main():
     setup = "\
 from random import randrange \n\
 import numpy as np \n\
+from copy import deepcopy \n\
 from search.negamax import Search \n\
 search = Search(-1) \n\
 state_obj = [ \n\
@@ -20,8 +21,10 @@ state_obj = [ \n\
 
     search_obj = "search.start(state_obj)"
 
-    #print("====== Benchmark alphabeta search python objects =====")
-    #print(avg_time(search_obj, setup, 1))
+    '''
+    print("====== Benchmark alphabeta search python objects =====")
+    print(avg_time(search_obj, setup, 1000))
+    '''
 
     print("====== Profiler alphabeta search numpy =====")
     cProfile.run(setup+search_obj, sort="tottime", filename="/tmp/bench_alphabeta_search_obj.txt")

@@ -1,8 +1,12 @@
 from math import inf
-from copy import deepcopy
+#from copy import deepcopy
+import numpy as np
 from search.cache import LRUCache, HistoryHeuristic
 from heuristic.eval_obj import HeuristicObj
 from game.game_obj import GameObj
+
+def deepcopy(state):
+    return np.copy(state).tolist()
 
 class Search:
 
@@ -14,7 +18,7 @@ class Search:
         self.eval_fn = self.heuristic.evaluation_fn
 
     def start(self, state):
-        self.depth = 3
+        self.depth = 4
         α = -inf
         β = inf
         move = self.negamax(state, self.depth, α, β, self.game.color)
@@ -77,7 +81,7 @@ class Search:
         else:
             self.set_tt(state, best_value, depth, best_move, 0)
 
-        if color == self.game.color:
+        if color == self.game.color and best_move != None:
             self.hh[best_move] = 2**depth
         
         return best_move if depth == self.depth else best_value
