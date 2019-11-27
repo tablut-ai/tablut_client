@@ -7,15 +7,15 @@ from random import randrange \n\
 import numpy as np \n\
 from copy import deepcopy \n\
 from search.negamax import Search \n\
-search = Search(-1) \n\
+search = Search(-1, float('infinity')) \n\
 state_obj = [ \n\
     [0, 0, 0, -1, -1, -1, 0, 0, 0], \n\
     [0, 0, 0, 0, -1, 0, 0, 0, 0], \n\
     [0, 0, 0, 0, 1, 0, 0, 0, 0], \n\
     [-1, 0, 0, 0, 1, 0, 0, 0,-1], \n\
-    [-1, -1, 1, 1, 2, 1, 1, -1, -1], \n\
+    [-1, -1, 1, 1, 2, 1, 0, -1, -1], \n\
     [-1, 0, 0, 0, 1, 0, 0, 0, -1], \n\
-    [0, 0, 0, 0, 1, 0, 0, 0, 0], \n\
+    [0, 0, 0, 0, 1, 0, 0, 1, 0], \n\
     [0, 0, 0, 0, -1, 0, 0, 0, 0], \n\
     [0, 0, 0, -1, -1, -1, 0, 0, 0]] \n"
 
