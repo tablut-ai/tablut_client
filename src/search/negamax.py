@@ -1,26 +1,26 @@
 from math import inf
-#from copy import deepcopy
+from time import time
 import numpy as np
 from search.cache import LRUCache, HistoryHeuristic
 from heuristic.eval_obj import HeuristicObj
 from game.game_obj import GameObj
 
-def deepcopy(state):
-    return np.copy(state).tolist()
-
 class Search:
 
-    def __init__(self, color):
+    def __init__(self, color, timeout = 59.5): 
         self.tt = LRUCache()
         self.hh = HistoryHeuristic()
         self.game = GameObj(color)
         self.heuristic = HeuristicObj()
         self.eval_fn = self.heuristic.evaluation_fn
+        self.time = 0
+        self.TIMEOUT = timeout
 
     def start(self, state):
         self.depth = 4
         α = -inf
         β = inf
+        self.time = time()
         move = self.negamax(state, self.depth, α, β, self.game.color)
         return move
 
@@ -34,6 +34,9 @@ class Search:
 
     def orderMoves(self, move):
         return self.hh.get(move)
+
+    def deepcopy(self, state):
+        return np.copy(state).tolist()
 
     def negamax(self, state, depth, α, β, color):
         alphaOrig = α
@@ -60,7 +63,9 @@ class Search:
         best_value = -inf
         best_move = None
         for child_move in moves:
-            next_state = self.game.result(deepcopy(state), child_move, color)
+            if time() - self.time >= self.TIMEOUT:
+                break
+            next_state = self.game.result(self.deepcopy(state), child_move, color)
             child_value = -self.negamax(next_state, depth-1, -β, -α, -color)
 
             if child_value >= best_value:
