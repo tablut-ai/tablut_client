@@ -114,18 +114,17 @@ class GameObj:
             if captured != None:
                 next_hash ^= self.zobrist_table[captured[0]][captured[1]][0]
                 next_pawns[0].remove(captured)
-            terminal = self._king_escape(next_state) ##swapped
+            terminal = self._king_escape(next_state)
         else:
             next_state, captured = self._black_capture_white(next_state, move)
             if captured != None:
                 next_hash ^= self.zobrist_table[captured[0]][captured[1]][1]
                 next_pawns[1].remove(captured)
-            terminal = self._capture_king(next_state, next_pawns) ###
+            terminal = self._capture_king(next_state, next_pawns)
 
         return next_state, next_hash, next_pawns, terminal
 
     def _white_capture_black(self, state, move):
-
         my_row = move[1][0]
         my_column =  move[1][1]
 
