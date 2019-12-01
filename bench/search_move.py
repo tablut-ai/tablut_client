@@ -2,12 +2,14 @@ import sys, os, timeit, cProfile, pstats
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 
 def main():
+    import multiprocessing as mp
+    mp.set_start_method('fork')
     setup = "\
 from random import randrange \n\
 import numpy as np \n\
 from copy import deepcopy \n\
 from search.negamax import Search \n\
-search = Search(-1, float('6')) \n\
+search = Search(1, float('infinity')) \n\
 state_obj = [ \n\
     [ 0,  0,  0, -1, -1, -1,  0,  0,  0], \n\
     [ 0,  0,  0,  0, -1,  0,  0,  0,  0], \n\

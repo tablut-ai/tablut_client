@@ -1,7 +1,7 @@
 
 class LRUCache:
-    def __init__(self, manager=None, size=1e8):
-        self.od = manager.dict() if manager != None else dict()
+    def __init__(self, size=1e8):
+        self.od = dict()
         self.size = size
 
     def get(self, key, default=None):
@@ -12,8 +12,8 @@ class LRUCache:
         self.od[key] = value
 
 class HistoryHeuristic:
-    def __init__(self, manager=None, size=1e8):
-        self.od = manager.dict() if manager != None else dict()
+    def __init__(self, size=1e8):
+        self.od = dict()
         self.size = size
 
     def get(self, move, default=None):
