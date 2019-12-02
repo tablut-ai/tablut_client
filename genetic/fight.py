@@ -7,8 +7,10 @@ from genotype import Genotype
 
 def main():
     timeout = 59.5
-    g1 = Genotype(2, -1, 10, 1, -2, -4, 1)
-    g2 = Genotype(2, -1, 10, 1, -2, -4, 1)
+    GA = Genotype(N = 2)
+    GA.initialize_population()
+    g1 = GA.population[0]
+    g2 = GA.population[1]
     w = Search(1, timeout)
     b = Search(-1, timeout)
     start(w, b)
