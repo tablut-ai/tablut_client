@@ -258,7 +258,7 @@ class GameObj:
             and state[6][4] == -1):
             return True
                 
-        if state[4][4] != 2:
+        if state[4][4] != 2 and state[4][5] != 2 and state[5][4] != 2 and state[4][3] != 2 and state[3][4] != 2:
             k_row = pawns[2][0][0]
             k_column = pawns[2][0][1]
             
