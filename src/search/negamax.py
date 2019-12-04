@@ -9,12 +9,12 @@ from select import select
 
 class Search:
 
-    def __init__(self, color, timeout = 59.5, depth=4): 
+    def __init__(self, color, weights, timeout = 59.5, depth=3): 
         self.TIMEOUT = timeout
         self.DEPTH = depth
 
         self.game = GameObj(color)
-        self.heuristic = HeuristicObj()
+        self.heuristic = HeuristicObj(weights)
         self.eval_fn = self.heuristic.evaluation_fn
 
         self.tt = LRUCache()
@@ -24,7 +24,7 @@ class Search:
         self.jobs_queue = Queue()
         self.moves_queue = Queue()
         
-        num_worker = 4 #cpu_count()
+        num_worker = 1 #cpu_count()
         for i in range(num_worker):
             search_pipe, cache_pipe = Pipe(True)
             self.cache_pipes.append(cache_pipe)
