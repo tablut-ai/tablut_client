@@ -6,12 +6,12 @@ from game.game_obj import GameObj
 
 class Search:
 
-    def __init__(self, color, timeout = 59.5): 
+    def __init__(self, color,weights, timeout = 59.5): 
         self.tt = LRUCache()
         self.hh = HistoryHeuristic()
 
         self.game = GameObj(color)
-        self.heuristic = HeuristicObj()
+        self.heuristic = HeuristicObj(weights)
         self.eval_fn = self.heuristic.evaluation_fn
 
         self.started = 0
