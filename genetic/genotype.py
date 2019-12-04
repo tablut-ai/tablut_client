@@ -6,7 +6,7 @@ from random import randint, randrange, uniform, seed
 
 
 class Genotype:
-    def __init__(self, N = 100, n_offsprings = 2, n_genes = 11, mutation_prob = 1, 
+    def __init__(self, N = 100, n_offsprings = 2, n_genes = 11, mutation_prob = 0.05, 
                 tourn_size = 10, max_generation = 5, timeout = 59.5,
                     genes_dict ={   0 : "escape_w" ,
                                     1 : "citadel_w" ,
@@ -78,7 +78,9 @@ class Genotype:
         
         self.white_population.sort(key = lambda x: x[1], reverse = True)
         self.black_population.sort(key = lambda x: x[1], reverse = True)
+
         print("\n\nBest white player\n", self.white_population[0], "\n Best black player\n", self.black_population[0])
+        return self.white_population[0][0], self.black_population[0][0]
 
     def initialize_population(self):
 
@@ -123,12 +125,12 @@ class Genotype:
         offspring_1[0] = parent_1[0][:p1] + parent_2[0][p1:p2] + parent_1[0][p2:]
         offspring_2[0] = parent_2[0][:p1] + parent_1[0][p1:p2] + parent_2[0][p2:]
 
-        self.non_uniform_mutation(offspring_1)
-        self.non_uniform_mutation(offspring_2)
+        self.mutation(offspring_1)
+        self.mutation(offspring_2)
 
         return offspring_1, offspring_2
 
-    def non_uniform_mutation(self, offspring):
+    def mutation(self, offspring):
         if uniform(0,1) <= self.mutation_prob:
             print("\nMutation\n")
             gene_number = randrange(0, self.n_genes)
