@@ -21,9 +21,9 @@ def fight(w, b):
     state = [
         [ 0,  0,  0, -1, -1, -1,  0,  0,  0],
         [ 0,  0,  0,  0, -1,  0,  0,  0,  0],
-        [ 0,  0,  0,  0,  1,  2,  0,  0,  0],
+        [ 0,  0,  0,  0,  1,  0,  0,  0,  0],
         [-1,  0,  0,  0,  1,  0,  0,  0, -1], 
-        [-1, -1,  1,  1,  0,  1,  1, 0, -1], 
+        [-1, -1,  1,  1,  2,  1,  1, -1, -1], 
         [-1,  0,  0,  0,  1,  0,  0,  0, -1], 
         [ 0,  0,  0,  0,  1,  0,  0,  0,  0], 
         [ 0,  0,  0,  0, -1,  0,  0,  0,  0], 
@@ -36,7 +36,6 @@ def fight(w, b):
     print("White player weights:", w.heuristic.weights, "\n black player weights:", b.heuristic.weights)
 
     while True:
-        '''
         move = w.start(state)
         state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
         print("========== WHITE MOVE: ", move, "\n")
@@ -44,7 +43,7 @@ def fight(w, b):
         if terminal: # ww
             print("\n========== WHITE WIN ==========")
             return 1
-        '''
+        
         color = -color
 
         move = b.start(state)

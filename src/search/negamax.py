@@ -9,7 +9,7 @@ from select import select
 
 class Search:
 
-    def __init__(self, color, weights, timeout = 59.5, depth=3): 
+    def __init__(self, color, weights, timeout = 59.5, depth=5): 
         self.TIMEOUT = timeout
         self.DEPTH = depth
 
@@ -24,8 +24,8 @@ class Search:
         self.jobs_queue = Queue()
         self.moves_queue = Queue()
         
-        num_worker = 1 #cpu_count()
-        for i in range(num_worker):
+        self.num_worker = 4 #cpu_count()
+        for i in range(self.num_worker):
             search_pipe, cache_pipe = Pipe(True)
             self.cache_pipes.append(cache_pipe)
             Process(target=self.search_worker, args=[self.jobs_queue, self.moves_queue, search_pipe, depth, color]).start()
@@ -67,15 +67,23 @@ class Search:
         β = inf
         pawns, hash_ = self.game.compute_state(state)
 
-        # YBWC
         moves = self.game.actions(state, self.game.color, pawns)
         moves.sort(key = self.order_moves)
-        first_move = moves.pop(0)
-        self.jobs_queue.put((state, hash_, pawns, first_move, α, β, started))
 
-        α = self.moves_queue.get(block=True)[0]
-        best = [α, first_move]
+        best = [α, None]
 
+        # YBWC
+        for i in range(self.num_worker):
+            first_move = moves.pop(0)
+            self.jobs_queue.put((state, hash_, pawns, first_move, α, β, started))
+
+        for i in range(self.num_worker):
+            recvd = self.moves_queue.get(block=True)
+            if best[0] < recvd[0]:
+                best = recvd
+
+        α = best[0]
+        
         for move in moves:
             self.jobs_queue.put((state, hash_, pawns, move, α, β, started))
         
