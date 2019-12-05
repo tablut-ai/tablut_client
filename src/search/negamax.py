@@ -9,7 +9,7 @@ from select import select
 
 class Search:
 
-    def __init__(self, color, weights, timeout = 59.5, depth=5): 
+    def __init__(self, color, weights, timeout = 59.5, depth=4): 
         self.TIMEOUT = timeout
         self.DEPTH = depth
 
@@ -24,7 +24,7 @@ class Search:
         self.jobs_queue = Queue()
         self.moves_queue = Queue()
         
-        self.num_worker = 4 #cpu_count()
+        self.num_worker = 1#cpu_count()
         for i in range(self.num_worker):
             search_pipe, cache_pipe = Pipe(True)
             self.cache_pipes.append(cache_pipe)

@@ -1,6 +1,7 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 from search.negamax import Search
+from time import time
 
 def fitness_fn(white_population, black_population, timeout):
     for w in white_population:
@@ -9,12 +10,8 @@ def fitness_fn(white_population, black_population, timeout):
             b_player = Search(-1, timeout = timeout, weights = b[0])
 
             result = fight(w_player, b_player)
-            if result == 1:
-                w[1] += 1
-                b[1] -= 1
-            if result == -1:
-                w[1] -= 1
-                b[1] += 1
+            w[1] += result
+            b[1] -= result
 
 def fight(w, b):
     past_states = dict()
@@ -36,23 +33,31 @@ def fight(w, b):
     print("White player weights:", w.heuristic.weights, "\n black player weights:", b.heuristic.weights)
 
     while True:
+        timed_out = 0
+        started = time()
         move = w.start(state)
+        if time() - started > w.TIMEOUT:
+            timed_out = 0.4
         state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
         print("========== WHITE MOVE: ", move, "\n")
         print_state(state)
         if terminal: # ww
             print("\n========== WHITE WIN ==========")
-            return 1
+            return 1 - timed_out
         
         color = -color
 
+        timed_out = 0
+        started = time()
         move = b.start(state)
+        if time() - started > w.TIMEOUT:
+            timed_out = -0.4
         state, hash_, pawns, terminal = b.game.update_state(state, hash_, pawns, move, color)
         print("========== BLACK MOVE: ", move, "\n")
         print_state(state)
         if terminal: # bw
             print("\n========== BLACK WIN ==========")
-            return -1
+            return -1 -timed_out
 
         color = -color
 
