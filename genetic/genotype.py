@@ -6,7 +6,7 @@ from random import randint, randrange, uniform, seed
 
 
 class Genotype:
-    def __init__(self, N = 100, n_offsprings = 2, n_genes = 11, mutation_prob = 0.05, 
+    def __init__(self, N = 50, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
                 tourn_size = 10, max_generation = 5, timeout = 59.5,
                     genes_dict ={   0 : "escape_w" ,
                                     1 : "citadel_w" ,
@@ -20,17 +20,17 @@ class Genotype:
                                     9 : "white_w" ,
                                     10 :"black_w" },
 
-                    genes_bounds = {"escape_w" : (10,100),
-                                "citadel_w" : (-20,10),
-                                "throne_w" : (-20,10),
-                                "near_white_w" : (-20,10),
-                                "adjacent_white_w" : (-20,10),
-                                "near_black_w" : (-20,10),
-                                "adjacent_black_w" : (-20,10),
-                                "material_w" : (1,10),
-                                "king_pos_w" : (1,10),
-                                "white_w" : (1,11),
-                                "black_w" : (1,11)
+                    genes_bounds = {"escape_w" : (1,20),
+                                "citadel_w" : (-2,0),
+                                "throne_w" : (-2,0),
+                                "near_white_w" : (-2,2),
+                                "adjacent_white_w" : (-2,2),
+                                "near_black_w" : (-5, 0),
+                                "adjacent_black_w" : (-5,0),
+                                "material_w" : (0,100),
+                                "king_pos_w" : (0,100),
+                                "white_w" : (0,100),
+                                "black_w" : (0,100)
                     }):
 
         self.N = N #must be even
@@ -86,16 +86,16 @@ class Genotype:
 
         for i in range(2 * self.N):
             escape_w = randrange(self.genes_bounds["escape_w"][0], self.genes_bounds["escape_w"][1])
-            citadel_w = randrange(self.genes_bounds["citadel_w"][0], self.genes_bounds["citadel_w"][1])
-            throne_w = randrange(self.genes_bounds["throne_w"][0], self.genes_bounds["throne_w"][1])
-            near_white_w = randrange(self.genes_bounds["near_white_w"][0], self.genes_bounds["near_white_w"][1])
-            adjacent_white_w = randrange(self.genes_bounds["adjacent_white_w"][0], self.genes_bounds["adjacent_white_w"][1])
-            near_black_w = randrange(self.genes_bounds["near_black_w"][0], self.genes_bounds["near_black_w"][1])
-            adjacent_black_w = randrange(self.genes_bounds["adjacent_black_w"][0], self.genes_bounds["adjacent_black_w"][1])
-            material_w = randrange(self.genes_bounds["material_w"][0], self.genes_bounds["material_w"][1])
-            king_pos_w = randrange(self.genes_bounds["king_pos_w"][0], self.genes_bounds["king_pos_w"][1])
-            white_w = 0.1 * randrange(self.genes_bounds["white_w"][0], self.genes_bounds["white_w"][1])
-            black_w = 0.1 * randrange(self.genes_bounds["black_w"][0], self.genes_bounds["black_w"][1])
+            citadel_w = 0.1 * randrange(self.genes_bounds["citadel_w"][0], self.genes_bounds["citadel_w"][1])
+            throne_w = 0.1 * randrange(self.genes_bounds["throne_w"][0], self.genes_bounds["throne_w"][1])
+            near_white_w = 0.1 * randrange(self.genes_bounds["near_white_w"][0], self.genes_bounds["near_white_w"][1])
+            adjacent_white_w = 0.1 * randrange(self.genes_bounds["adjacent_white_w"][0], self.genes_bounds["adjacent_white_w"][1])
+            near_black_w = 0.1 * randrange(self.genes_bounds["near_black_w"][0], self.genes_bounds["near_black_w"][1])
+            adjacent_black_w = 0.1 * randrange(self.genes_bounds["adjacent_black_w"][0], self.genes_bounds["adjacent_black_w"][1])
+            material_w = 0.01 * randrange(self.genes_bounds["material_w"][0], self.genes_bounds["material_w"][1])
+            king_pos_w = 0.01 * randrange(self.genes_bounds["king_pos_w"][0], self.genes_bounds["king_pos_w"][1])
+            white_w = 0.01 * randrange(self.genes_bounds["white_w"][0], self.genes_bounds["white_w"][1])
+            black_w = 0.01 * randrange(self.genes_bounds["black_w"][0], self.genes_bounds["black_w"][1])
 
             agent = [[escape_w, 
                     citadel_w, 
@@ -115,11 +115,9 @@ class Genotype:
                 self.black_population.append(agent)
 
 
-    def two_point_cross_over(self, parent_1, parent_2):
-        #p1 = randrange(self.n_genes)
-        #p2 = randrange(self.n_genes)
+    def two_points_cross_over(self, parent_1, parent_2):
         print("\n2 points crossover\n")
-        p1, p2 = 3, 7
+        p1, p2 = 3,7
         offspring_1 = [None, 0.]
         offspring_2 = [None, 0.]
         offspring_1[0] = parent_1[0][:p1] + parent_2[0][p1:p2] + parent_1[0][p2:]
@@ -135,7 +133,13 @@ class Genotype:
             print("\nMutation\n")
             gene_number = randrange(0, self.n_genes)
             mutated_gene = self.genes_dict[gene_number]
-            offspring[0][gene_number] = randrange(self.genes_bounds[mutated_gene][0], self.genes_bounds[mutated_gene][1])
+            if gene_number > 6 and gene_number < 11 :
+                offspring[0][gene_number] = 0.01 * randrange(self.genes_bounds[mutated_gene][0], self.genes_bounds[mutated_gene][1])
+            if gene_number > 0 and gene_number < 7:
+                offspring[0][gene_number] = 0.1 * randrange(self.genes_bounds[mutated_gene][0], self.genes_bounds[mutated_gene][1])
+            else:
+                offspring[0][gene_number] = randrange(self.genes_bounds[mutated_gene][0], self.genes_bounds[mutated_gene][1])
+
 
 
     def fitness_fn(self, white_population, black_population):
@@ -175,8 +179,6 @@ class Genotype:
         while True:
             move = w.start(state)
             state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
-            #print("========== WHITE MOVE: ", move, "\n")
-            #self.print_state(state)
             if terminal: # ww
                 print("\n========== WHITE WIN ==========")
                 return 1
@@ -185,8 +187,6 @@ class Genotype:
 
             move = b.start(state)
             state, hash_, pawns, terminal = b.game.update_state(state, hash_, pawns, move, color)
-            #print("========== BLACK MOVE: ", move, "\n")
-            #self.print_state(state)
             if terminal: # bw
                 print("\n========== BLACK WIN ==========")
                 return -1
