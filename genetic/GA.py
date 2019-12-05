@@ -5,13 +5,7 @@ from game.game_obj import GameObj
 from genotype import Genotype
 
 def main():
-    timeout = 59.5
-    N = 4 
-    tournament_size = 2
-    number_of_generations = 3
-    mutation_prob = 0.05 
-    GA = Genotype(N = N, timeout = timeout, tourn_size = tournament_size, 
-                    max_generation = number_of_generations, mutation_prob = mutation_prob)
+    GA = Genotype()
                     
     white_weights, black_weights = GA.start()
 

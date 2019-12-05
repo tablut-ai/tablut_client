@@ -6,8 +6,8 @@ from random import randint, randrange, uniform, seed
 
 
 class Genotype:
-    def __init__(self, N = 50, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
-                tourn_size = 10, max_generation = 5, timeout = 59.5,
+    def __init__(self, N = 10, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
+                tourn_size = 3, max_generation = 16, timeout = 59.5,
                     genes_dict ={   0 : "escape_w" ,
                                     1 : "citadel_w" ,
                                     2 : "throne_w",
