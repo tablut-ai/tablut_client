@@ -1,16 +1,14 @@
 import random
 import numpy as np
 
-class GameObj:
+class Game:
 
-    def __init__(self, color):
-        self.color = color
-
+    def __init__(self):
         self.citadels = [[0,3], [0,4], [0,5], [1,4], 
                          [8,3], [8,4], [8,5], [7,4], 
                          [3,8], [4,8], [5,8], [4,7], 
                          [3,0], [4,0], [5,0], [4,1]]
-
+                         
         self.safe_citadels = [[0,3], [0,4], [0,5], 
                               [8,3], [8,4], [8,5], 
                               [3,8], [4,8], [5,8], 
@@ -24,6 +22,7 @@ class GameObj:
                         [1,8],[2,8],[6,8],[7,8]]
 
         self.zobrist_table = [[[random.randint(1,2**64 - 1) for i in [0, 1, 2]]for j in range(9)]for k in range(9)]
+
 
     def actions(self, state, color, pawns):
         moves = []
@@ -79,6 +78,7 @@ class GameObj:
 
         return moves
 
+
     def compute_state(self, state):
         pawns = [[], [], []]
         hash_ = 0
@@ -91,6 +91,7 @@ class GameObj:
                 pawns[piece].append([i, j])
 
         return pawns, hash_
+
 
     def update_state(self, state, hash_, pawns, move, color):
         from_ = [move[0][0], move[0][1]]
@@ -123,6 +124,7 @@ class GameObj:
             terminal = self._capture_king(next_state, next_pawns)
 
         return next_state, next_hash, next_pawns, terminal
+
 
     def _white_capture_black(self, state, move):
         my_row = move[1][0]
@@ -174,6 +176,7 @@ class GameObj:
 
         return state, None
 
+
     def _black_capture_white(self, state, move):
         my_row = move[1][0]
         my_column =  move[1][1]
@@ -219,6 +222,7 @@ class GameObj:
             return state, [my_row, my_column + 1]
 
         return state, None
+
 
     def _capture_king(self, state, pawns):
         #King on the throne
@@ -275,11 +279,13 @@ class GameObj:
                     
         return False
 
+
     def _king_escape(self, state):
         for escape in self.escapes:
             if state[escape[0]][escape[1]] == 2:
                 return True
         return False
+
 
     def deepcopy(self, state):
         return np.copy(state).tolist()

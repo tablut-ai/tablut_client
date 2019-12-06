@@ -1,4 +1,4 @@
-class HeuristicObj:
+class Heuristic:
     def __init__(self, weights):
         self.citadels = [[0,3], [0,4], [0,5], [1,4], 
                             [8,3], [8,4], [8,5], [7,4], 
@@ -33,8 +33,8 @@ class HeuristicObj:
 
         return turn * val
 
-    def eval_king_pos(self, state, king_pos): 
 
+    def eval_king_pos(self, state, king_pos): 
         row = king_pos[0]
         col = king_pos[1]
         score = 0

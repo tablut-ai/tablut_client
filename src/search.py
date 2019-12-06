@@ -1,25 +1,25 @@
 from math import inf
 from time import time
-from search.cache import Cache
-from heuristic.eval_obj import HeuristicObj
-from game.game_obj import GameObj
+from collections import OrderedDict
 from os import getpid
-from multiprocessing import Process, Queue, Pipe, cpu_count, Manager
+from multiprocessing import Process, Queue, Pipe, cpu_count
 from select import select
+from heuristic import Heuristic
+from game import Game
 
 class Search:
 
     def __init__(self, color, weights, timeout = 59.5, depth = 4): 
         self.TIMEOUT = timeout
         self.DEPTH = depth
-        self.CACHE_SYNC_RATE = 20
+        self.COLOR = color
         self.NUM_WORKERS = cpu_count()
 
-        self.game = GameObj(color)
-        self.heuristic = HeuristicObj(weights)
+        self.game = Game()
+        self.heuristic = Heuristic(weights)
         # transposition table & history heuristic
-        self.tt = Cache(1e6)
-        self.hh = Cache(1e6)
+        self.tt = Cache(1e7)
+        self.hh = Cache(1e7)
 
         self.cache_pipes = []
         self.jobs_queue = Queue(1)
@@ -37,7 +37,6 @@ class Search:
         # start cache worker
         self.cache_worker = Process(target=self.cache_worker_process, args=[self.cache_pipes])
         self.cache_worker.start()
-        for p in self.cache_pipes: p.close() # is used by cache worker
 
         
     def dispose(self):
@@ -47,6 +46,43 @@ class Search:
         self.moves_queue.close()
         map(lambda p: p.close(), self.cache_pipes)
 
+        
+    def start(self, state):
+        started = time()
+        α = -inf
+        β = inf
+        best = [α, None]
+        # comupte init state, generate & sort moves
+        pawns, hash_ = self.game.compute_state(state)
+        moves = self.game.actions(state, self.COLOR, pawns)
+        moves.sort(key = self.order_moves)
+
+        running_jobs = 0
+        while len(moves) > 0:
+            # blocking put on jobs queue (sized 1)
+            move = moves.pop(0)
+            self.jobs_queue.put((state, hash_, pawns, move, α, β, started), block=True)
+            running_jobs += 1
+            # if move available: update α and best
+            try: recvd = self.moves_queue.get(block=False)
+            except Exception: recvd = None
+            if recvd != None:
+                running_jobs -= 1
+                if best[0] < recvd[0]:
+                    α = recvd[0]
+                    best = recvd
+        # wait last moves
+        while running_jobs > 0:
+            recvd = self.moves_queue.get(block=True)
+            running_jobs -= 1
+            if best[0] < recvd[0]:
+                best = recvd
+
+        # cache sync
+        for p in self.cache_pipes:
+            p.send("sync")
+
+        return best[1]
 
     def cache_worker_process(self, pipes):
         try:
@@ -62,14 +98,12 @@ class Search:
                     update_counter += 1
                     self.tt.merge(req[0])
                     self.hh.merge(req[1])
-                '''
+                
                 # update searcher cache
-                if update_counter >= self.cache_update_rate:
-                    print("\n\nyy")
+                if update_counter == len(pipes):
                     for p in pipes:
                         p.send((self.tt, self.hh))
                     update_counter = 0
-                '''
         except Exception as e:
             print("\n\n\n", "[cache worker ", getpid(), "] ERRORED:", e)
 
@@ -78,58 +112,19 @@ class Search:
         try:
             print("[search worker ", getpid(), "] started.")
             while True:
-                state, hash_, pawns, move, α, β, started = jobs_queue.get(block=True)
-                print("[search worker ", getpid(), "] processing move: ", move, α)
-                next_state, next_hash, next_pawns, terminal = self.game.update_state(state, hash_, pawns, move, color)
-                child_value = -self.negamax(next_state, depth-1, -β, -α, -color, next_pawns, next_hash, terminal, started)
-                moves_queue.put((child_value, move))
-                '''
-                # pipe buffer deadlock
-                if cache_pipe.poll():
-                    a = cache_pipe.recv()
-                    self.tt.merge(a[0])
-                    self.hh.merge(a[1])
-                else:
-                    cache_pipe.send((self.tt, self.hh))
-                '''
+                ready, _, __ = select([jobs_queue._reader.fileno(), cache_pipe.fileno()], [], [])
+                for r in ready:
+                    if r == cache_pipe.fileno():
+                        cache_pipe.recv() # it consumes the sync signal 
+                        cache_pipe.send((self.tt, self.hh))
+                        self.tt, self.hh = cache_pipe.recv()
+                    else:
+                        state, hash_, pawns, move, α, β, started = jobs_queue.get(block=True)
+                        next_state, next_hash, next_pawns, terminal = self.game.update_state(state, hash_, pawns, move, color)
+                        child_value = -self.negamax(next_state, depth-1, -β, -α, -color, next_pawns, next_hash, terminal, started)
+                        moves_queue.put((child_value, move))
         except Exception as e:
             print("\n\n\n", "[search worker ", getpid(), "] ERRORED:", e)
-
-        
-    def start(self, state):
-        started = time()
-        α = -inf
-        β = inf
-        best = [α, None]
-        # comupte init state, generate & sort moves
-        pawns, hash_ = self.game.compute_state(state)
-        moves = self.game.actions(state, self.game.color, pawns)
-        moves.sort(key = self.order_moves)
-
-        running_jobs = 0
-        while len(moves) > 0:
-            # blocking put on jobs queue (sized 1)
-            move = moves.pop(0)
-            self.jobs_queue.put((state, hash_, pawns, move, α, β, started), block=True)
-            running_jobs += 1
-
-            # if move available: update α and best
-            try: recvd = self.moves_queue.get(block=False)
-            except Exception: recvd = None
-            if recvd != None:
-                running_jobs -= 1
-                if best[0] < recvd[0]:
-                    α = recvd[0]
-                    best = recvd
-                    
-        # wait last moves
-        while running_jobs > 0:
-            recvd = self.moves_queue.get(block=True)
-            running_jobs -= 1
-            if best[0] < recvd[0]:
-                best = recvd
-
-        return best[1]
 
 
     def negamax(self, state, depth, α, β, color, pawns, hash_, terminal, started):
@@ -161,7 +156,7 @@ class Search:
             if time() - started >= self.TIMEOUT:
                 print("timeout")
                 if best_value == -inf:
-                    return best_value * self.game.color * color # should be always the minimum
+                    return best_value * self.COLOR * color # should be always the minimum
                 break
             # compute next state
             next_state, next_hash, next_pawns, terminal = self.game.update_state(state, hash_, pawns, child_move, color)
@@ -185,7 +180,7 @@ class Search:
             entry["flag"] = 0
         self.tt[hash_] = entry
         # update history heuristic 
-        if color == self.game.color and best_move != None:
+        if color == self.COLOR and best_move != None:
             self.hh[(tuple(best_move[0]), tuple(best_move[1]))] = 2**depth
         
         return best_value
@@ -195,5 +190,28 @@ class Search:
         stored = self.hh.get((tuple(move[0]), tuple(move[1])))
         if stored == None:
             # default order criteria: throne-from distance + throne-to distance
-            return (4-move[0][0])*(4-move[0][0]) + (4-move[0][1]) * (4-move[0][1]) + (4-move[1][0])*(4-move[1][0]) + (4-move[1][1]) * (4-move[1][1])
+            return (4-move[0][0])*(4-move[0][0]) + (4-move[0][1]) * (4-move[0][1]) + (
+                (4-move[1][0])*(4-move[1][0]) + (4-move[1][1]) * (4-move[1][1]))
         return stored        
+
+
+class Cache:
+    def __init__(self, size):
+        self.od = OrderedDict()
+        self.size = size
+
+    def get(self, key, default=None):
+        try: return self.od[key]
+        except KeyError: return default
+
+    def __setitem__(self, key, value):
+        self.od[key] = value
+        self._check_size_limit()
+
+    def merge(self, that):
+        self.od = {**self.od, **that.od}
+        self._check_size_limit()
+
+    def _check_size_limit(self):
+        while len(self.od) > self.size:
+            self.od.pop(next(iter(self.od.keys())))

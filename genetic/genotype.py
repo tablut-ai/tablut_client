@@ -1,11 +1,14 @@
 import sys, os
+from random import randint, randrange, uniform, seed
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
 from fitness import fitness_fn
-from random import randint, randrange, uniform, seed
+
+def main():
+    Genotype().start()    
 
 class Genotype:
-    def __init__(self, N = 10, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
-                tourn_size = 3, max_generation = 16, timeout = 59.5,
+    def __init__(self, N = 2, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
+                tourn_size = 1, max_generation = 1, timeout = 59.5,
                     genes_dict ={   0 : "escape_w" ,
                                     1 : "citadel_w" ,
                                     2 : "throne_w",
@@ -78,7 +81,12 @@ class Genotype:
         self.black_population.sort(key = lambda x: x[1], reverse = True)
 
         print("\n\nBest white player\n", self.white_population[0], "\n Best black player\n", self.black_population[0])
-        return self.white_population[0][0], self.black_population[0][0]
+        fd = open("population_w.txt", "w")
+        fd.write(self.white_population)
+        fd.close()
+        fd = open("population_b.txt", "w")
+        fd.write(self.black_population)
+        fd.close()
 
     def initialize_population(self):
 
@@ -166,3 +174,6 @@ class Genotype:
         n = int(self.N/2)
         self.white_population = self.white_population[:n] + new_white_population[:n]
         self.black_population = self.black_population[:n] + new_black_population[:n]
+
+
+if __name__ == '__main__': main()

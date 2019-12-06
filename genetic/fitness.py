@@ -1,6 +1,6 @@
 import sys, os
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/../src")
-from search.negamax import Search
+from search import Search
 from time import time
 
 def fitness_fn(white_population, black_population, timeout):
@@ -72,6 +72,7 @@ def fight(w, b):
             return 0
         except: past_states[hash_] = 1
 
+
 def print_state(state):
     for r in range(9):
         u = ""
@@ -90,7 +91,7 @@ def print_state(state):
     print("    ", "  ".join(str(x) for x in range(9)))
 
 if __name__ == "__main__": 
-    timeout = float('infinity')
+    timeout = float('59.5')
     w_player = Search( 1, timeout = timeout, weights = [10, -1, 1, 1, 1, -2, -4, 2, 5, 1, 1])
     b_player = Search(-1, timeout = timeout, weights = [10, -1, 1, 1, 1, -2, -4, 2, 5, 1, 1])
 

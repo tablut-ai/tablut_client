@@ -8,7 +8,7 @@ def main():
 from random import randrange \n\
 import numpy as np \n\
 from copy import deepcopy \n\
-from search.negamax import Search \n\
+from search import Search \n\
 search = Search(1, float('infinity')) \n\
 state_obj = [ \n\
     [ 0,  0,  0, -1, -1, -1,  0,  0,  0], \n\
