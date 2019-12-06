@@ -115,10 +115,10 @@ class Search:
                 ready, _, __ = select([jobs_queue._reader.fileno(), cache_pipe.fileno()], [], [])
                 for r in ready:
                     if r == cache_pipe.fileno():
-                        msg = "sync"
-                        while msg == "sync": msg = cache_pipe.recv() # it consumes the sync signal 
+                        msg = cache_pipe.recv()
                         cache_pipe.send((self.tt, self.hh))
-                        self.tt, self.hh = cache_pipe.recv()
+                        while msg == "sync": msg = cache_pipe.recv() # it consumes other eventual sync signal 
+                        self.tt, self.hh = msg
                     else:
                         state, hash_, pawns, move, α, β, started = jobs_queue.get(block=True)
                         next_state, next_hash, next_pawns, terminal = self.game.update_state(state, hash_, pawns, move, color)
