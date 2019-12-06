@@ -126,6 +126,7 @@ class Search:
                         moves_queue.put((child_value, move))
         except Exception as e:
             print("\n\n\n", "[search worker ", getpid(), "] ERRORED:", e)
+            print(len(self.tt.od), len(self.hh.od))
 
 
     def negamax(self, state, depth, α, β, color, pawns, hash_, terminal, started):
