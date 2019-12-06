@@ -13,6 +13,9 @@ def fitness_fn(white_population, black_population, timeout):
             w[1] += result
             b[1] -= result
 
+            w_player.dispose()
+            b_player.dispose()
+
 def fight(w, b):
     past_states = dict()
     state = [
@@ -30,16 +33,17 @@ def fight(w, b):
     pawns, hash_ = w.game.compute_state(state)
 
     print("\n\n==========        " + u'\u2694'+ u'\u2694'+ u'\u2694' + "   FIGHT   " + u'\u2694'+ u'\u2694'+ u'\u2694' + "        ==========")
-    print("White player weights:", w.heuristic.weights, "\n black player weights:", b.heuristic.weights)
+    print("WHITE WEIGHTS:", w.heuristic.weights, "\nBLACK WEIGHTS:", b.heuristic.weights)
 
     while True:
         timed_out = 0
         started = time()
         move = w.start(state)
-        if time() - started > w.TIMEOUT:
+        elapsed = time() - started
+        if elapsed > w.TIMEOUT:
             timed_out = 0.4
         state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
-        print("========== WHITE MOVE: ", move, "\n")
+        print("========== WHITE MOVE: ", move, "TIME:", elapsed, "\n")
         print_state(state)
         if terminal: # ww
             print("\n========== WHITE WIN ==========")
@@ -50,14 +54,15 @@ def fight(w, b):
         timed_out = 0
         started = time()
         move = b.start(state)
-        if time() - started > w.TIMEOUT:
+        elapsed = time() - started
+        if elapsed > w.TIMEOUT:
             timed_out = -0.4
         state, hash_, pawns, terminal = b.game.update_state(state, hash_, pawns, move, color)
-        print("========== BLACK MOVE: ", move, "\n")
+        print("========== BLACK MOVE: ", move, "time:", elapsed, "\n")
         print_state(state)
         if terminal: # bw
             print("\n========== BLACK WIN ==========")
-            return -1 -timed_out
+            return -1 - timed_out
 
         color = -color
 
