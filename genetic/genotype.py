@@ -121,7 +121,7 @@ class Genotype:
                 self.black_population.append(agent)
 
 
-    def two_points_cross_over(self, parent_1, parent_2):
+    def two_point_cross_over(self, parent_1, parent_2):
         print("\n2 points crossover\n")
         p1, p2 = 3,7
         offspring_1 = [None, 0.]
