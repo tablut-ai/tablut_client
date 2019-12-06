@@ -41,7 +41,9 @@ class Search:
         
     def dispose(self):
         self.cache_worker.terminate()
-        map(lambda w: w.terminate(), self.search_workers)
+        for w in self.search_workers:
+            w.terminate()
+        #map(lambda w: w.terminate(), self.search_workers)
         self.jobs_queue.close()
         self.moves_queue.close()
         map(lambda p: p.close(), self.cache_pipes)
@@ -86,7 +88,6 @@ class Search:
 
     def cache_worker_process(self, pipes):
         try:
-            print("[cache worker ", getpid(), "] started.")
             update_counter = 0
             readers = list(map(lambda p: p.fileno(), pipes))
             while True:
@@ -110,7 +111,6 @@ class Search:
                 
     def search_worker_process(self, jobs_queue, moves_queue, cache_pipe, depth, color):
         try:
-            print("[search worker ", getpid(), "] started.")
             while True:
                 ready, _, __ = select([jobs_queue._reader.fileno(), cache_pipe.fileno()], [], [])
                 for r in ready:

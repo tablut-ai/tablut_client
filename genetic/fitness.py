@@ -43,8 +43,7 @@ def fight(w, b):
         if elapsed > w.TIMEOUT:
             timed_out = 0.4
         state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
-        print("========== WHITE MOVE: ", move, "TIME:", elapsed, "\n")
-        print_state(state)
+        print("WHITE MOVE: ", move, "TIME:", elapsed, "\n")
         if terminal: # ww
             print("\n========== WHITE WIN ==========")
             return 1 - timed_out
@@ -58,8 +57,7 @@ def fight(w, b):
         if elapsed > w.TIMEOUT:
             timed_out = -0.4
         state, hash_, pawns, terminal = b.game.update_state(state, hash_, pawns, move, color)
-        print("========== BLACK MOVE: ", move, "time:", elapsed, "\n")
-        print_state(state)
+        print("BLACK MOVE: ", move, "TIME:", elapsed, "\n")
         if terminal: # bw
             print("\n========== BLACK WIN ==========")
             return -1 - timed_out

@@ -82,10 +82,10 @@ class Genotype:
 
         print("\n\nBest white player\n", self.white_population[0], "\n Best black player\n", self.black_population[0])
         fd = open("population_w.txt", "w")
-        fd.write(self.white_population)
+        fd.write(str(self.white_population))
         fd.close()
         fd = open("population_b.txt", "w")
-        fd.write(self.black_population)
+        fd.write(str(self.black_population))
         fd.close()
 
     def initialize_population(self):
