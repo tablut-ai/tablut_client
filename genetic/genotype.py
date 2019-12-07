@@ -7,8 +7,8 @@ def main():
     Genotype().start()    
 
 class Genotype:
-    def __init__(self, N = 2, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
-                tourn_size = 1, max_generation = 1, timeout = 59.5,
+    def __init__(self, N = 10, n_offsprings = 2, n_genes = 11, mutation_prob = 0.2, 
+                tourn_size = 3, max_generation = 3, timeout = 59.5,
                     genes_dict ={   0 : "escape_w" ,
                                     1 : "citadel_w" ,
                                     2 : "throne_w",
