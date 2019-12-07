@@ -33,7 +33,7 @@ def fight(w, b):
     pawns, hash_ = w.game.compute_state(state)
 
     print("\n\n========== FIGHT ==========")
-    print("WHITE WEIGHTS:", w.heuristic.weights, "\nBLACK WEIGHTS:", b.heuristic.weights)
+    print("WHITE WEIGHTS:", w.heuristic.weights, "\nBLACK WEIGHTS:", b.heuristic.weights, "\n")
 
     while True:
         timed_out = 0

@@ -49,7 +49,9 @@ class Search:
         for w in self.search_workers: w.terminate()
         self.jobs_queue.close()
         self.moves_queue.close()
-        map(lambda p: p.close(), self.cache_pipes)
+        for i in range(self.NUM_WORKERS):
+            self.cache_pipes[i].close()
+            self.sync_pipes[i].close()
 
         
     def start(self, state):
