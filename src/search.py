@@ -22,28 +22,31 @@ class Search:
         self.hh = Cache(1e7)
 
         self.cache_pipes = []
+        self.sync_pipes = []
         self.jobs_queue = Queue(1)
         self.moves_queue = Queue()
         # start search workers
         self.search_workers = []
         for i in range(self.NUM_WORKERS):
-            search_pipe, cache_pipe = Pipe(True)
-            self.cache_pipes.append(cache_pipe)
-            process = Process(target=self.search_worker_process, args=[self.jobs_queue, self.moves_queue, search_pipe, depth, color])
+            cache_pipe0, cache_pipe1 = Pipe(True)
+            sync_pipe0, sync_pipe1 = Pipe(True)
+            self.sync_pipes.append(sync_pipe1)
+            self.cache_pipes.append(cache_pipe1)
+            process = Process(target=self.search_worker_process, args=[self.jobs_queue, self.moves_queue, cache_pipe0, sync_pipe0, depth, color])
             self.search_workers.append(process)
             process.start()
-            search_pipe.close() # are used by search workers
+            cache_pipe0.close() # are used by search workers
+            sync_pipe0.close()
 
         # start cache worker
         self.cache_worker = Process(target=self.cache_worker_process, args=[self.cache_pipes])
         self.cache_worker.start()
+        for p in self.cache_pipes: p.close()
 
         
     def dispose(self):
         self.cache_worker.terminate()
-        for w in self.search_workers:
-            w.terminate()
-        #map(lambda w: w.terminate(), self.search_workers)
+        for w in self.search_workers: w.terminate()
         self.jobs_queue.close()
         self.moves_queue.close()
         map(lambda p: p.close(), self.cache_pipes)
@@ -81,7 +84,7 @@ class Search:
                 best = recvd
 
         # cache sync
-        for p in self.cache_pipes:
+        for p in self.sync_pipes:
             p.send("sync")
 
         return best[1]
@@ -109,16 +112,15 @@ class Search:
             print("\n\n\n", "[cache worker ", getpid(), "] ERRORED:", e)
 
                 
-    def search_worker_process(self, jobs_queue, moves_queue, cache_pipe, depth, color):
+    def search_worker_process(self, jobs_queue, moves_queue, cache_pipe, sync_pipe, depth, color):
         try:
             while True:
-                ready, _, __ = select([jobs_queue._reader.fileno(), cache_pipe.fileno()], [], [])
+                ready, _, __ = select([jobs_queue._reader.fileno(), sync_pipe.fileno()], [], [])
                 for r in ready:
-                    if r == cache_pipe.fileno():
-                        msg = cache_pipe.recv()
+                    if r == sync_pipe.fileno():
+                        sync_pipe.recv() # it consumes sync signal 
                         cache_pipe.send((self.tt, self.hh))
-                        while msg == "sync": msg = cache_pipe.recv() # it consumes other eventual sync signal 
-                        self.tt, self.hh = msg
+                        self.tt, self.hh = cache_pipe.recv()
                     else:
                         state, hash_, pawns, move, α, β, started = jobs_queue.get(block=True)
                         next_state, next_hash, next_pawns, terminal = self.game.update_state(state, hash_, pawns, move, color)

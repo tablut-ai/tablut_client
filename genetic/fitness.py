@@ -32,7 +32,7 @@ def fight(w, b):
     color = 1
     pawns, hash_ = w.game.compute_state(state)
 
-    print("\n\n==========        " + u'\u2694'+ u'\u2694'+ u'\u2694' + "   FIGHT   " + u'\u2694'+ u'\u2694'+ u'\u2694' + "        ==========")
+    print("\n\n========== FIGHT ==========")
     print("WHITE WEIGHTS:", w.heuristic.weights, "\nBLACK WEIGHTS:", b.heuristic.weights)
 
     while True:
@@ -43,7 +43,7 @@ def fight(w, b):
         if elapsed > w.TIMEOUT:
             timed_out = 0.4
         state, hash_, pawns, terminal = w.game.update_state(state, hash_, pawns, move, color)
-        print("WHITE MOVE: ", move, "TIME:", elapsed, "\n")
+        print("WHITE MOVE: ", move, "TIME:", elapsed)
         if terminal: # ww
             print("\n========== WHITE WIN ==========")
             return 1 - timed_out
@@ -57,7 +57,7 @@ def fight(w, b):
         if elapsed > w.TIMEOUT:
             timed_out = -0.4
         state, hash_, pawns, terminal = b.game.update_state(state, hash_, pawns, move, color)
-        print("BLACK MOVE: ", move, "TIME:", elapsed, "\n")
+        print("BLACK MOVE: ", move, "TIME:", elapsed)
         if terminal: # bw
             print("\n========== BLACK WIN ==========")
             return -1 - timed_out
