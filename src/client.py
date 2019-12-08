@@ -7,7 +7,11 @@ from search import Search
 def main():
     host, port, color, timeout = parse_arg()
     client = Client(host, port)
-    search = Search(color, [10, -1, 1, 1, 1, -2, -4, 2, 5, 1, 1], float(timeout), depth = 4)
+    weights = {
+        1:  [6, -0.1, -0.2, 0.1, 0.0, -0.2, -0.2, 0.67, 0.51, 0.18, 0.83],
+        -1: [15, -0.2, -0.1, -0.1, -0.1, -0.2, -0.1, 0.27, 0.05, 0.68, 0.65]
+    }
+    search = Search(color, weights[color], float(timeout)-0.7, depth = 4)
 
     try:
         # present name
