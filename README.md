@@ -1,4 +1,7 @@
 # Tablut client
 
-### How to launch
-`py src/client.py server_host server_port`
+### How to launch from VM
+`/tablut/runmyplayer color timeout server_host`
+
+Generic launch:
+`python3 src/client.py color timeout server_host`
